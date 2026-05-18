@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Protected Ethical Anis AI</title>
 
   <style>
@@ -15,44 +15,48 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      flex-direction: column;
       text-align: center;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
-
-    p {
-      max-width: 600px;
-      color: #cbd5e1;
-      margin-bottom: 30px;
-      line-height: 1.5;
-    }
-
-    .launch-btn {
-      display: inline-block;
-      padding: 14px 28px;
-      background: #22c55e;
-      color: white;
-      text-decoration: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      transition: 0.2s ease;
-    }
-
-    .launch-btn:hover {
-      background: #16a34a;
-      transform: scale(1.05);
     }
 
     .card {
       background: #111827;
-      padding: 30px;
+      padding: 40px;
       border-radius: 16px;
+      max-width: 600px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 26px;
+      background: #22c55e;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #16a34a;
+      transform: scale(1.05);
+    }
+
+    .note {
+      margin-top: 15px;
+      font-size: 12px;
+      color: #94a3b8;
     }
   </style>
 </head>
@@ -63,17 +67,29 @@
     <h1>Protected Ethical Anis AI</h1>
 
     <p>
-      Advanced ethical AI monitoring and protected intelligence framework designed
-      for secure, responsible and intelligent AI systems.
+      Advanced ethical AI monitoring and protected intelligence framework
+      designed for secure and responsible AI systems.
     </p>
 
-    <!-- CLICKABLE BUTTON -->
-    <a class="launch-btn"
-       href="http://127.0.0.1:8000/docs"
+    <!-- IMPORTANT BUTTON -->
+    <a class="btn"
+       id="launchBtn"
+       href="#"
        target="_blank">
       Launch AI System
     </a>
+
+    <div class="note">
+      Backend URL will be connected after deployment
+    </div>
   </div>
+
+  <script>
+    // 🔥 CHANGE THIS AFTER BACKEND DEPLOYMENT
+    const BACKEND_URL = "https://YOUR-BACKEND-URL.onrender.com/docs";
+
+    document.getElementById("launchBtn").href = BACKEND_URL;
+  </script>
 
 </body>
 </html>
