@@ -1,36 +1,16 @@
+```python
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+import os
 
-app = FastAPI(
-    title="Protected Ethical Anis AI",
-    description="Ethical and protected AI monitoring system",
-    version="1.0.0"
-)
+app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Serve frontend files
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
-@app.get("/")
-def home():
-    return {
-        "message": "Protected Ethical Anis AI Running Successfully"
-    }
-
-@app.get("/health")
-def health():
-    return {
-        "status": "healthy"
-    }
-
-@app.get("/metrics")
-def metrics():
-    return {
-        "fairness": "stable",
-        "reliability": "high",
-        "security": "protected"
-    }
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    with open("frontend/index.html", "r", encoding="utf-8") as f:
+        return f.read()
+```
