@@ -1,15 +1,14 @@
-```python id="1ocb0m"
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
-# Static frontend files
+# Serve frontend files
+
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def home():
-    with open("frontend/index.html", "r", encoding="utf-8") as f:
-        return f.read()
-```
+with open("frontend/index.html", "r", encoding="utf-8") as f:
+return f.read()
