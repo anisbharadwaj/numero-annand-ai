@@ -1,14 +1,23 @@
+# backend/main.py (or merge into your existing app)
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+app = FastAPI(title="Protected Ethical Anis AI")
 
-# Serve frontend files
+# Allow the frontend origin(s). For simplicity allow all origins during initial setup.
+# For production, replace "*" with your Vercel URL: "https://your-frontend.vercel.app"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # <-- change to your Vercel URL when ready
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
 
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+@app.get("/health")
+async def health():
+    return {"status": "ok", "message": "backend healthy"}
 
-@app.get("/", response_class=HTMLResponse)
-async def home():
-with open("frontend/index.html", "r", encoding="utf-8") as f:
-return f.read()
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Protected Ethical Anis AI backend running"}
