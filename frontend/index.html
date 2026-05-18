@@ -5,94 +5,97 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Protected Ethical Anis AI</title>
   <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; padding:0; display:flex; align-items:center; justify-content:center; min-height:100vh; background:#f6f8fb; color:#0b1220; }
-    .card { width:min(920px,94%); background:#fff; border-radius:12px; box-shadow:0 6px 30px rgba(15,23,42,0.08); padding:28px; }
-    h1 { margin:0 0 8px 0; font-size:20px; }
-    p { margin:0 0 18px 0; color:#334155; }
-    .controls { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; }
-    button, a.button { background:#0b69ff; color:#fff; border:none; padding:10px 14px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
-    button.secondary { background:#e6eefc; color:#0b69ff; }
-    .status { margin-top:14px; color:#334155; font-size:14px; }
-    input[type="text"] { padding:8px 10px; border-radius:8px; border:1px solid #e6eefc; width:100%; max-width:420px; }
-    .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    footer { margin-top:18px; font-size:13px; color:#64748b; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f7fb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 420px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    h1 { margin-bottom: 10px; }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+    }
+
+    button.secondary {
+      background: #10b981;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #333;
+    }
   </style>
 </head>
+
 <body>
-  <div class="card" role="main">
+  <div class="container">
     <h1>Protected Ethical Anis AI</h1>
-    <p>Lightweight demo UI. Click <strong>Launch AI System</strong> to open the live backend docs, or check backend health below.</p>
 
-    <div class="row">
-      <label for="backendUrl">Backend URL</label>
-      <input id="backendUrl" type="text" placeholder="https://your-backend.onrender.com" />
-    </div>
+    <p>Enter backend URL (Render):</p>
 
-    <div class="controls">
-      <button id="launchBtn" type="button">Launch AI System</button>
-      <button id="healthBtn" class="secondary" type="button">Check Backend Health</button>
-      <a id="docsLink" class="button" href="#" target="_blank" rel="noopener">Open Docs</a>
-    </div>
+    <input id="backendUrl" placeholder="https://your-backend.onrender.com" />
 
-    <div class="status" id="status">Status: <em>unknown</em></div>
-    <footer>Deployment: Frontend → Vercel; Backend → Render</footer>
+    <button onclick="checkHealth()">Check Backend Health</button>
+    <button class="secondary" onclick="launchAI()">Launch AI System</button>
+
+    <div class="status" id="status">Status: Waiting...</div>
   </div>
 
   <script>
-    // **Production placeholder**: replace with your Render URL after backend deploy
     const DEFAULT_BACKEND = "https://your-backend.onrender.com";
 
-    const backendInput = document.getElementById("backendUrl");
-    const launchBtn = document.getElementById("launchBtn");
-    const healthBtn = document.getElementById("healthBtn");
-    const docsLink = document.getElementById("docsLink");
-    const statusEl = document.getElementById("status");
-
-    // Initialize input with placeholder (no localhost)
-    backendInput.value = DEFAULT_BACKEND;
-
-    function backendBase() {
-      const v = backendInput.value.trim();
-      return v ? v.replace(/\/+$/, "") : DEFAULT_BACKEND;
+    function getBackend() {
+      const val = document.getElementById("backendUrl").value.trim();
+      return val || DEFAULT_BACKEND;
     }
 
-    // Open backend docs in a new tab
-    launchBtn.addEventListener("click", () => {
-      const url = backendBase() + "/docs";
-      window.open(url, "_blank", "noopener");
-    });
+    async function checkHealth() {
+      const url = getBackend();
+      const status = document.getElementById("status");
 
-    // Also keep a direct docs link for convenience
-    docsLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      const url = backendBase() + "/docs";
-      window.open(url, "_blank", "noopener");
-    });
-
-    // Health check (GET /health or /)
-    healthBtn.addEventListener("click", async () => {
-      const base = backendBase();
-      statusEl.textContent = "Status: checking...";
       try {
-        // Try /health then / (fallback)
-        let res = await fetch(base + "/health", { method: "GET", mode: "cors" });
-        if (!res.ok) {
-          res = await fetch(base + "/", { method: "GET", mode: "cors" });
-        }
-        if (!res.ok) throw new Error("non-OK response");
-        const data = await res.json().catch(() => null);
-        statusEl.textContent = "Status: online" + (data && data.message ? " — " + data.message : "");
+        const res = await fetch(url + "/health");
+        const data = await res.json();
+        status.innerText = "Status: " + data.message;
       } catch (err) {
-        statusEl.textContent = "Status: unreachable (check backend URL and CORS)";
+        status.innerText = "Status: Backend not reachable";
       }
-    });
+    }
 
-    // Optional: auto-check once on load
-    window.addEventListener("load", () => {
-      // Do not auto-call network if user hasn't set a real URL; keep it manual for beginners
-      // statusEl.textContent = "Status: ready";
-      statusEl.textContent = "Status: ready — set backend URL and click Check Backend Health";
-    });
+    function launchAI() {
+      const url = getBackend();
+      window.open(url + "/docs", "_blank");
+    }
   </script>
 </body>
 </html>
