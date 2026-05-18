@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  test:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -24,7 +24,8 @@ jobs:
       - name: Ensure sample fixture exists
         run: |
           mkdir -p tests/fixtures
-          python tests/generate_sample.py || echo "generator missing; ensure tests/fixtures/sample.csv exists"
+          if [ ! -f tests/fixtures/sample.csv ]; then python tests/generate_sample.py; fi
+          ls -la tests/fixtures
 
       - name: Run unit tests
         run: |
@@ -34,20 +35,29 @@ jobs:
       - name: Start backend for integration tests
         run: |
           python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000 &
-          sleep 3
+          sleep 4
 
       - name: Run integration and e2e tests
         run: |
           pytest tests/test_end_to_end_audit.py -q || true
         continue-on-error: true
 
-      - name: Redact artifacts for PII
+      - name: Collect reports
         run: |
           mkdir -p reports
-          # Example: copy pytest junit xml if produced and run a simple redaction
+          # copy any generated JSON reports or test outputs into reports/
           if [ -f junit.xml ]; then cp junit.xml reports/junit.xml; fi
-          # run a simple grep-based scrub (customize as needed)
-          if [ -d reports ]; then sed -i -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}/[REDACTED_EMAIL]/g' reports/* || true; fi
+          if [ -d reports_raw ]; then cp -r reports_raw/* reports/ || true; fi
+
+      - name: Redact artifacts for PII
+        run: |
+          # basic redaction: emails and 10-digit numbers
+          if [ -d reports ]; then
+            for f in reports/*; do
+              sed -i -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}/[REDACTED_EMAIL]/g' "$f" || true
+              sed -i -E 's/\b[0-9]{10}\b/[REDACTED_PHONE]/g' "$f" || true
+            done
+          fi
 
       - name: Upload test artifacts
         uses: actions/upload-artifact@v4
