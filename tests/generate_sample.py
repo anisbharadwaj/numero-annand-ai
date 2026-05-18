@@ -1,7 +1,10 @@
-import csv, uuid, random, time
+# tests/generate_sample.py
+import csv, uuid, random, time, os
+os.makedirs('tests/fixtures', exist_ok=True)
+path = 'tests/fixtures/sample.csv'
 regions = ['RegionA','RegionB','RegionC']
 genders = ['male','female','other']
-with open('tests/fixtures/sample.csv','w',newline='') as f:
+with open(path,'w',newline='') as f:
     w = csv.writer(f)
     w.writerow(['unique_id','input_text','model_output','ground_truth','timestamp','user_region','user_gender','confidence','api_key'])
     for i in range(1200):
@@ -11,3 +14,4 @@ with open('tests/fixtures/sample.csv','w',newline='') as f:
         pred = gt if random.random() > 0.15 else 1-gt
         ts = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
         w.writerow([uid,text,str(pred),str(gt),ts,random.choice(regions),random.choice(genders),round(random.random(),2),'test-key'])
+print("Wrote", path)
