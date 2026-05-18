@@ -1,12 +1,11 @@
-```python
+```python id="1ocb0m"
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-import os
 
 app = FastAPI()
 
-# Serve frontend files
+# Static frontend files
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
