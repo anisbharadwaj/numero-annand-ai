@@ -1,52 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protected Ethical Anis AI</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protected Ethical Anis AI</title>
 
-    <style>
-        body{
-            background:#0b1020;
-            color:white;
-            font-family:Arial;
-            text-align:center;
-            padding-top:100px;
-        }
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
+    }
 
-        h1{
-            font-size:60px;
-        }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
 
-        p{
-            font-size:20px;
-            width:70%;
-            margin:auto;
-            line-height:1.7;
-        }
+    p {
+      max-width: 600px;
+      color: #cbd5e1;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
 
-        button{
-            margin-top:30px;
-            padding:15px 40px;
-            border:none;
-            border-radius:10px;
-            background:#00bfff;
-            color:white;
-            font-size:18px;
-            cursor:pointer;
-        }
-    </style>
+    .launch-btn {
+      display: inline-block;
+      padding: 14px 28px;
+      background: #22c55e;
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      transition: 0.2s ease;
+    }
+
+    .launch-btn:hover {
+      background: #16a34a;
+      transform: scale(1.05);
+    }
+
+    .card {
+      background: #111827;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+  </style>
 </head>
+
 <body>
 
+  <div class="card">
     <h1>Protected Ethical Anis AI</h1>
 
     <p>
-        Advanced ethical AI monitoring and protected intelligence framework
-        designed for secure and responsible AI systems.
+      Advanced ethical AI monitoring and protected intelligence framework designed
+      for secure, responsible and intelligent AI systems.
     </p>
 
-    <button>Launch AI System</button>
+    <!-- CLICKABLE BUTTON -->
+    <a class="launch-btn"
+       href="http://127.0.0.1:8000/docs"
+       target="_blank">
+      Launch AI System
+    </a>
+  </div>
 
 </body>
 </html>
