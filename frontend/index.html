@@ -1,217 +1,508 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ANIS AI SYSTEM</title>
 
 <style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
 body{
-  margin:0;
-  font-family:Arial;
-  background:#05070d;
-  color:white;
+background:#020617;
+color:white;
+overflow-x:hidden;
 }
 
-/* HEADER */
+body::before{
+content:"";
+position:fixed;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at top left,#00f7ff33,transparent 30%),
+radial-gradient(circle at bottom right,#ff00ff22,transparent 30%);
+z-index:-1;
+}
+
 .header{
-  text-align:center;
-  font-size:28px;
-  color:#00f5ff;
-  text-shadow:0 0 10px #00f5ff;
-  padding:15px;
+padding:25px;
+text-align:center;
+font-size:42px;
+font-weight:bold;
+color:#00f7ff;
+text-shadow:0 0 20px #00f7ff;
 }
 
-/* LOGIN */
-.login{
-  position:fixed;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+.container{
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:80vh;
 }
 
 .card{
-  width:350px;
-  padding:20px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid #00f5ff;
-  border-radius:12px;
+width:420px;
+background:#0f172acc;
+padding:30px;
+border-radius:20px;
+border:1px solid #00f7ff44;
+box-shadow:0 0 25px #00f7ff33;
+backdrop-filter:blur(10px);
 }
 
 input{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  background:#111;
-  border:none;
-  color:white;
+width:100%;
+padding:14px;
+margin-top:15px;
+border:none;
+border-radius:10px;
+background:#1e293b;
+color:white;
+font-size:15px;
 }
 
 button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:linear-gradient(90deg,#00f5ff,#ff00d4);
-  border:none;
-  cursor:pointer;
+width:100%;
+padding:14px;
+margin-top:18px;
+border:none;
+border-radius:10px;
+font-size:15px;
+font-weight:bold;
+cursor:pointer;
+background:linear-gradient(90deg,#00f7ff,#ff00ff);
+color:white;
+transition:0.3s;
 }
 
-/* FLOATING AI WIDGET */
-.ai-widget{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  width:250px;
-  background:#111;
-  border:1px solid #00f5ff;
-  border-radius:10px;
-  overflow:hidden;
+button:hover{
+transform:scale(1.02);
 }
 
-.ai-header{
-  background:#00f5ff;
-  color:black;
-  padding:8px;
-  cursor:pointer;
-  font-weight:bold;
+.status{
+margin-top:15px;
+text-align:center;
+color:#00ff88;
 }
 
-.ai-body{
-  display:none;
-  padding:10px;
+.dashboard{
+display:none;
+padding:30px;
 }
 
-.ai-input{
-  width:100%;
-  padding:8px;
-  margin-top:8px;
-}
-
-/* TOP BUTTONS */
 .topbar{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  padding:10px;
+display:flex;
+gap:15px;
+margin-bottom:20px;
 }
 
-.small-btn{
-  padding:8px;
-  width:120px;
-  background:#222;
-  border:1px solid #00f5ff;
-  color:white;
-  cursor:pointer;
+.panel{
+background:#0f172a;
+padding:20px;
+border-radius:15px;
+border:1px solid #00f7ff33;
+margin-top:20px;
 }
+
+.health{
+color:#00ff88;
+margin-top:10px;
+}
+
+.chat-box{
+height:300px;
+overflow-y:auto;
+background:#111827;
+padding:15px;
+border-radius:12px;
+margin-bottom:10px;
+}
+
+.msg{
+margin:10px 0;
+padding:10px;
+border-radius:10px;
+}
+
+.user{
+background:#1e293b;
+}
+
+.ai{
+background:#00f7ff22;
+}
+
+.widget{
+position:fixed;
+right:20px;
+bottom:20px;
+width:320px;
+background:#111827;
+border-radius:20px;
+overflow:hidden;
+border:1px solid #00f7ff55;
+box-shadow:0 0 25px #00f7ff33;
+}
+
+.widget-header{
+padding:15px;
+background:#00f7ff;
+color:black;
+font-weight:bold;
+cursor:pointer;
+}
+
+.widget-body{
+display:none;
+padding:15px;
+}
+
+.voice-btn{
+background:#ff00ff;
+}
+
+.small{
+font-size:13px;
+margin-top:10px;
+color:#94a3b8;
+text-align:center;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="header">⚡ ANIS AI SYSTEM ⚡</div>
+<div class="header">
+⚡ ANIS AI SYSTEM ⚡
+</div>
 
-<!-- TOP CONTROLS -->
+<div class="container" id="authPage">
+
+<div class="card">
+
+<h2>Secure Login</h2>
+
+<input id="email" type="email" placeholder="Email">
+
+<input id="password" type="password" placeholder="Password">
+
+<div style="margin-top:15px;">
+<input type="checkbox" id="robot">
+ I am Human
+</div>
+
+<button onclick="register()">
+Register
+</button>
+
+<button onclick="login()">
+Login
+</button>
+
+<div class="status" id="status"></div>
+
+<div class="small">
+Protected AI Security System
+</div>
+
+</div>
+
+</div>
+
+<div class="dashboard" id="dashboard">
+
 <div class="topbar">
-  <button class="small-btn" onclick="launch()">🚀 Launch</button>
-  <button class="small-btn" onclick="check()">🩺 Check</button>
+
+<button onclick="launchSystem()">
+🚀 Launch
+</button>
+
+<button onclick="healthCheck()">
+🩺 Check
+</button>
+
+<button onclick="logout()">
+Logout
+</button>
+
 </div>
 
-<!-- LOGIN -->
-<div class="login" id="loginPage">
-  <div class="card">
-    <input id="username" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
+<div class="panel">
 
-    <button onclick="register()">Register</button>
-    <button onclick="login()">Login</button>
-  </div>
+<h2>System Status</h2>
+
+<div class="health" id="health">
+Waiting...
 </div>
 
-<!-- FLOATING AI -->
-<div class="ai-widget">
-  <div class="ai-header" onclick="toggleAI()">🤖 Anis AI</div>
+</div>
 
-  <div class="ai-body" id="aiBody">
-    <input id="q" class="ai-input" placeholder="Ask AI...">
-    <button onclick="askAI()">Send</button>
-    <div id="ans"></div>
-  </div>
+<div class="panel">
+
+<h2>AI Chat</h2>
+
+<div class="chat-box" id="chatBox"></div>
+
+<input id="question" placeholder="Ask AI...">
+
+<button onclick="askAI()">
+Ask AI
+</button>
+
+<button class="voice-btn" onclick="voiceInput()">
+🎤 Voice Assistant
+</button>
+
+</div>
+
+</div>
+
+<div class="widget">
+
+<div class="widget-header" onclick="toggleWidget()">
+🤖 Anis AI
+</div>
+
+<div class="widget-body" id="widgetBody">
+
+<input id="widgetQuestion" placeholder="Ask AI...">
+
+<button onclick="widgetAsk()">
+Ask
+</button>
+
+<div id="widgetResponse"
+style="margin-top:10px;color:#00ff88;">
+</div>
+
+</div>
+
 </div>
 
 <script>
 
-const backend = "https://protected-ethical-anis-ai-12.onrender.com";
+const API =
+"https://protected-ethical-anis-ai-12.onrender.com"
 
-let token = "";
+function checkHuman(){
 
-/* REGISTER */
+if(!robot.checked){
+
+alert("Verify Human")
+
+return false
+}
+
+return true
+}
+
 async function register(){
-  await fetch(backend+"/register",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      username:username.value,
-      password:password.value
-    })
-  });
 
-  alert("Registered");
+if(!checkHuman()) return
+
+const res = await fetch(API + "/register",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+email:email.value,
+password:password.value
+})
+})
+
+const data = await res.json()
+
+status.innerHTML =
+data.message || data.detail
 }
 
-/* LOGIN */
 async function login(){
-  const res = await fetch(backend+"/login",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      username:username.value,
-      password:password.value
-    })
-  });
 
-  const data = await res.json();
+if(!checkHuman()) return
 
-  if(data.token){
-    token = data.token;
-    loginPage.style.display="none";
-  } else {
-    alert("Login failed");
-  }
+const res = await fetch(API + "/login",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+email:email.value,
+password:password.value
+})
+})
+
+const data = await res.json()
+
+if(data.token){
+
+localStorage.setItem(
+"anis_token",
+data.token
+)
+
+status.innerHTML =
+"✅ Login Successful"
+
+setTimeout(()=>{
+
+authPage.style.display="none"
+
+dashboard.style.display="block"
+
+},1000)
+
+}else{
+
+status.innerHTML =
+data.detail
+}
 }
 
-/* FLOAT AI */
-function toggleAI(){
-  const b = document.getElementById("aiBody");
-  b.style.display = (b.style.display==="block")?"none":"block";
+async function launchSystem(){
+
+health.innerHTML =
+"🚀 Launching..."
+
+setTimeout(()=>{
+
+health.innerHTML =
+"✅ ANIS AI SYSTEM ACTIVE"
+
+},1500)
 }
 
-/* ASK AI */
+async function healthCheck(){
+
+const start = Date.now()
+
+const res = await fetch(API + "/health")
+
+const data = await res.json()
+
+const end = Date.now()
+
+health.innerHTML = `
+Status: ${data.status}<br>
+Version: ${data.version}<br>
+Response: ${end-start}ms
+`
+}
+
 async function askAI(){
-  const res = await fetch(backend+"/chat",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({message:q.value})
-  });
 
-  const data = await res.json();
-  ans.innerHTML = data.reply;
+const msg = question.value
+
+chatBox.innerHTML += `
+<div class="msg user">
+👤 ${msg}
+</div>
+`
+
+const res = await fetch(API + "/chat",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:msg
+})
+})
+
+const data = await res.json()
+
+chatBox.innerHTML += `
+<div class="msg ai">
+🤖 ${data.reply}
+</div>
+`
+
+question.value=""
+
+chatBox.scrollTop =
+chatBox.scrollHeight
+
+saveMemory(msg,data.reply)
 }
 
-/* HEALTH CHECK */
-async function check(){
-  const start = Date.now();
+function saveMemory(q,a){
 
-  const res = await fetch(backend+"/health");
-  const data = await res.json();
+let memory =
+JSON.parse(
+localStorage.getItem("anis_memory")
+|| "[]"
+)
 
-  const time = Date.now() - start;
+memory.push({
+question:q,
+answer:a
+})
 
-  alert("STATUS: "+data.status+"\nUPTIME: "+data.uptime+"\nTIME: "+time+"ms");
+localStorage.setItem(
+"anis_memory",
+JSON.stringify(memory)
+)
 }
 
-/* LAUNCH */
-function launch(){
-  alert("System Check Running...");
-  check();
+function voiceInput(){
+
+const recognition =
+new webkitSpeechRecognition()
+
+recognition.lang="en-US"
+
+recognition.start()
+
+recognition.onresult = (event)=>{
+
+question.value =
+event.results[0][0].transcript
+}
+}
+
+function logout(){
+
+localStorage.clear()
+
+location.reload()
+}
+
+function toggleWidget(){
+
+widgetBody.style.display =
+widgetBody.style.display==="block"
+? "none"
+: "block"
+}
+
+async function widgetAsk(){
+
+const q =
+widgetQuestion.value
+
+const res = await fetch(API + "/chat",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:q
+})
+})
+
+const data = await res.json()
+
+widgetResponse.innerHTML =
+data.reply
 }
 
 </script>
