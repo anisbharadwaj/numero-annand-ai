@@ -1,133 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ANIS AI SYSTEM</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: radial-gradient(circle at top, #05070d, #000);
-  color: white;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#05070d;
+  color:white;
 }
 
-/* TITLE */
-.title {
-  text-align: center;
-  font-size: 34px;
-  font-weight: bold;
-  margin-top: 25px;
-  color: #00f5ff;
-  text-shadow: 0 0 10px #00f5ff, 0 0 20px #ff00d4;
-  letter-spacing: 3px;
+.title{
+  text-align:center;
+  font-size:32px;
+  color:#00f5ff;
+  text-shadow:0 0 10px #00f5ff;
+  margin-top:20px;
 }
 
-/* LOGIN SCREEN */
-.login {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+/* LOGIN */
+.login{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-.login-card {
-  width: 360px;
-  padding: 25px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(0,245,255,0.3);
-  border-radius: 15px;
-  box-shadow: 0 0 25px rgba(0,245,255,0.2);
-  backdrop-filter: blur(10px);
+.card{
+  width:350px;
+  padding:20px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid #00f5ff;
+  border-radius:12px;
+  box-shadow:0 0 20px #00f5ff;
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: none;
-  border-radius: 8px;
-  outline: none;
-  background: #0f172a;
-  color: white;
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border:none;
+  border-radius:8px;
+  background:#111;
+  color:white;
 }
 
-button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  background: linear-gradient(90deg, #00f5ff, #ff00d4);
-  color: black;
+button{
+  width:100%;
+  padding:10px;
+  background:linear-gradient(90deg,#00f5ff,#ff00d4);
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
 }
 
-/* APP */
-.container {
-  display: none;
-  height: 100vh;
+/* CHAT */
+.container{
+  display:none;
+  height:100vh;
 }
 
-.sidebar {
-  width: 220px;
-  background: #0f172a;
-  padding: 10px;
+.chat{
+  padding:10px;
 }
 
-.chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.msg{
+  margin:8px;
+  padding:10px;
+  border-radius:10px;
 }
 
-.header {
-  padding: 12px;
-  text-align: center;
-  background: #111827;
-  color: #00f5ff;
-  font-weight: bold;
-}
-
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.msg {
-  margin: 8px;
-  padding: 10px;
-  border-radius: 10px;
-  max-width: 70%;
-}
-
-.user {
-  background: #00f5ff;
-  color: black;
-  margin-left: auto;
-}
-
-.ai {
-  background: #1f2937;
-}
-
-.inputBox {
-  display: flex;
-  padding: 10px;
-  background: #0f172a;
-}
-
-.inputBox input {
-  flex: 1;
-}
+.user{background:#00f5ff;color:black;margin-left:auto;}
+.ai{background:#222;}
 </style>
-
 </head>
 
 <body>
@@ -136,9 +84,8 @@ button {
 
 <!-- LOGIN -->
 <div class="login" id="loginPage">
-  <div class="login-card">
-    <h2 style="text-align:center;">LOGIN</h2>
-
+  <div class="card">
+    <h3>LOGIN</h3>
     <input id="username" placeholder="Username">
     <input id="password" type="password" placeholder="Password">
 
@@ -147,26 +94,12 @@ button {
   </div>
 </div>
 
-<!-- CHAT APP -->
+<!-- CHAT -->
 <div class="container" id="app">
+  <div id="messages"></div>
 
-  <div class="sidebar">
-    <h3>AI MENU</h3>
-    <button onclick="startVoice()">🎤 Speak</button>
-  </div>
-
-  <div class="chat">
-
-    <div class="header">NEON AI CHAT</div>
-
-    <div class="messages" id="messages"></div>
-
-    <div class="inputBox">
-      <input id="msg" placeholder="Ask AI..." />
-      <button onclick="send()">Send</button>
-    </div>
-
-  </div>
+  <input id="msg" placeholder="Ask AI...">
+  <button onclick="send()">Send</button>
 </div>
 
 <script>
@@ -176,102 +109,66 @@ const backend = "https://protected-ethical-anis-ai-12.onrender.com";
 let token = "";
 
 /* REGISTER */
-async function register() {
-  try {
-    const res = await fetch(backend + "/register", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value
-      })
-    });
+async function register(){
+  await fetch(backend+"/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username:username.value,
+      password:password.value
+    })
+  });
 
-    const data = await res.json();
-    alert(data.msg || "Registered");
-  } catch (e) {
-    alert("Register failed");
-  }
+  alert("Registered");
 }
 
 /* LOGIN */
-async function login() {
-  try {
-    const res = await fetch(backend + "/login", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value
-      })
-    });
+async function login(){
+  const res = await fetch(backend+"/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username:username.value,
+      password:password.value
+    })
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (data.token) {
-      token = data.token;
-      loginPage.style.display = "none";
-      app.style.display = "flex";
-    } else {
-      alert("Login failed");
-    }
+  if(data.token){
+    token = data.token;
 
-  } catch (e) {
-    alert("Server error");
+    // SAVE TOKEN (IMPORTANT FIX)
+    localStorage.setItem("token", token);
+
+    loginPage.style.display="none";
+    app.style.display="block";
+  }else{
+    alert("Login failed");
   }
 }
 
 /* CHAT */
-async function send() {
-  if (!msg.value) return;
+async function send(){
+  const saved = localStorage.getItem("token");
 
-  add(msg.value, "user");
+  const res = await fetch(backend+"/chat",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      token:saved,
+      message:msg.value
+    })
+  });
 
-  try {
-    const res = await fetch(backend + "/chat", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        token: token,
-        message: msg.value
-      })
-    });
+  const data = await res.json();
 
-    const data = await res.json();
-    add(data.reply || "No response", "ai");
-
-  } catch (e) {
-    add("Error connecting AI", "ai");
-  }
-
-  msg.value = "";
-}
-
-/* UI */
-function add(text, type) {
   const div = document.createElement("div");
-  div.className = "msg " + type;
-  div.innerText = text;
+  div.className="msg ai";
+  div.innerText=data.reply;
   messages.appendChild(div);
-  div.scrollIntoView();
-}
 
-/* VOICE */
-function startVoice() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  if (!SpeechRecognition) {
-    alert("Voice not supported");
-    return;
-  }
-
-  const rec = new SpeechRecognition();
-  rec.lang = "en-US";
-  rec.start();
-
-  rec.onresult = (e) => {
-    msg.value = e.results[0][0].transcript;
-  };
+  msg.value="";
 }
 
 </script>
