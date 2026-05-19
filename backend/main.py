@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# allow frontend (Vercel) to call backend
+# allow frontend (Vercel)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,3 +19,13 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+# 🔥 NEW AI CHAT ENDPOINT
+@app.post("/chat")
+def chat(data: dict):
+    user_msg = data.get("message", "")
+
+    # simple AI logic (we can upgrade to OpenAI later)
+    reply = f"🤖 AI Response: I received -> {user_msg}"
+
+    return {"reply": reply}
