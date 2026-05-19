@@ -9,32 +9,28 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background: #0b0f1a;
   color: white;
 }
 
-/* layout */
 .container {
   display: flex;
   height: 100vh;
 }
 
-/* sidebar */
 .sidebar {
   width: 260px;
   background: #111827;
   padding: 15px;
 }
 
-/* chat area */
 .chat {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* header */
 .header {
   padding: 15px;
   background: #0f172a;
@@ -43,7 +39,6 @@ body {
   font-weight: bold;
 }
 
-/* messages */
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -55,7 +50,6 @@ body {
   padding: 10px;
   border-radius: 10px;
   max-width: 70%;
-  word-wrap: break-word;
 }
 
 .user {
@@ -69,7 +63,6 @@ body {
   margin-right: auto;
 }
 
-/* input */
 .inputBox {
   display: flex;
   padding: 10px;
@@ -91,7 +84,6 @@ button {
   cursor: pointer;
 }
 
-/* login */
 .login {
   position: fixed;
   inset: 0;
@@ -107,40 +99,38 @@ button {
   padding: 10px;
   width: 220px;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN -->
 <div class="login" id="loginPage">
   <h2>AI Login System</h2>
 
-  <input id="username" placeholder="Username" />
-  <input id="password" type="password" placeholder="Password" />
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
 
   <button onclick="register()">Register</button>
   <button onclick="login()">Login</button>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div class="container" id="app" style="display:none;">
 
   <div class="sidebar">
-    <h3>🤖 AI Panel</h3>
-    <p>Status: Online</p>
+    <h3>🤖 AI System</h3>
     <button onclick="startVoice()">🎤 Speak</button>
   </div>
 
   <div class="chat">
 
-    <div class="header">⚡ ChatGPT Style AI</div>
+    <div class="header">⚡ ChatGPT AI System</div>
 
     <div class="messages" id="messages"></div>
 
     <div class="inputBox">
-      <input id="msg" placeholder="Ask something..." />
+      <input id="msg" placeholder="Ask AI..." />
       <button onclick="send()">Send</button>
     </div>
 
@@ -149,17 +139,15 @@ button {
 
 <script>
 
-// 🔴 PUT YOUR RENDER BACKEND URL HERE
-const backend = "https://your-render-url.onrender.com";
+const backend = "https://protected-ethical-anis-ai-12.onrender.com";
 
 let token = "";
 
-// ================= AUTH =================
-
+// ---------- REGISTER ----------
 async function register() {
   await fetch(backend + "/register", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type":"application/json"},
     body: JSON.stringify({
       username: username.value,
       password: password.value
@@ -169,10 +157,11 @@ async function register() {
   alert("Registered successfully. Now login.");
 }
 
+// ---------- LOGIN ----------
 async function login() {
   const res = await fetch(backend + "/login", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type":"application/json"},
     body: JSON.stringify({
       username: username.value,
       password: password.value
@@ -186,38 +175,31 @@ async function login() {
   document.getElementById("app").style.display = "flex";
 }
 
-// ================= CHAT =================
-
+// ---------- CHAT ----------
 async function send() {
   const text = msg.value;
   if (!text) return;
 
-  addMessage(text, "user");
+  add(text, "user");
   msg.value = "";
 
-  try {
-    const res = await fetch(backend + "/chat", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        token: token,
-        message: text
-      })
-    });
+  const res = await fetch(backend + "/chat", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      token: token,
+      message: text
+    })
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    addMessage(data.reply, "ai");
-    speak(data.reply);
-
-  } catch (err) {
-    addMessage("Error connecting to AI backend", "ai");
-  }
+  add(data.reply, "ai");
+  speak(data.reply);
 }
 
-// ================= UI =================
-
-function addMessage(text, type) {
+// ---------- UI ----------
+function add(text, type) {
   const div = document.createElement("div");
   div.className = "msg " + type;
   div.innerText = text;
@@ -225,13 +207,12 @@ function addMessage(text, type) {
   div.scrollIntoView();
 }
 
-// ================= VOICE INPUT =================
-
+// ---------- VOICE INPUT ----------
 function startVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
-    alert("Voice not supported in this browser");
+    alert("Voice not supported");
     return;
   }
 
@@ -244,12 +225,11 @@ function startVoice() {
   };
 }
 
-// ================= VOICE OUTPUT =================
-
+// ---------- VOICE OUTPUT ----------
 function speak(text) {
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = "en-US";
-  window.speechSynthesis.speak(speech);
+  const s = new SpeechSynthesisUtterance(text);
+  s.lang = "en-US";
+  window.speechSynthesis.speak(s);
 }
 
 </script>
