@@ -1,50 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Protected Ethical Anis AI</title>
-  <style>
-    body { font-family: Arial; text-align: center; padding: 40px; }
-    input { padding: 10px; width: 300px; }
-    button { padding: 10px 15px; margin: 10px; cursor: pointer; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Protected Ethical Anis AI</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: white;
+}
+
+.container {
+  width: 90%;
+  max-width: 600px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 30px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+p {
+  color: #cbd5e1;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.3);
+  color: white;
+  outline: none;
+  margin-bottom: 15px;
+}
+
+input::placeholder {
+  color: #94a3b8;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.primary {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  color: white;
+}
+
+.primary:hover {
+  transform: scale(1.03);
+}
+
+.secondary {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.secondary:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.status {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  font-size: 14px;
+  color: #e2e8f0;
+}
+</style>
 </head>
+
 <body>
 
+<div class="container">
   <h1>Protected Ethical Anis AI</h1>
+  <p>Advanced AI monitoring & secure intelligence system</p>
 
-  <input id="backendUrl" placeholder="Enter backend URL" />
+  <input id="backendUrl" placeholder="Enter backend URL (Render link)" />
 
-  <br>
+  <button class="primary" onclick="checkBackend()">Check Backend Health</button>
+  <button class="secondary" onclick="launchAI()">Launch AI System</button>
 
-  <button onclick="checkBackend()">Check Backend Health</button>
-  <button onclick="launchAI()">Launch AI System</button>
+  <div class="status" id="status">Status: waiting...</div>
+</div>
 
-  <h3 id="status">Status: waiting...</h3>
+<script>
+function getURL() {
+  return document.getElementById("backendUrl").value.trim();
+}
 
-  <script>
-    function getURL() {
-      return document.getElementById("backendUrl").value.trim();
-    }
+async function checkBackend() {
+  try {
+    const res = await fetch(getURL() + "/health");
+    const data = await res.json();
 
-    async function checkBackend() {
-      try {
-        const res = await fetch(getURL() + "/health");
-        const data = await res.json();
+    document.getElementById("status").innerText =
+      "Status: " + (data.status || "error");
 
-        document.getElementById("status").innerText =
-          "Status: " + (data.status || "error");
+  } catch (e) {
+    document.getElementById("status").innerText =
+      "Status: offline";
+  }
+}
 
-      } catch (e) {
-        document.getElementById("status").innerText =
-          "Status: offline";
-      }
-    }
-
-    function launchAI() {
-      window.open(getURL() + "/docs", "_blank");
-    }
-  </script>
+function launchAI() {
+  window.open(getURL() + "/docs", "_blank");
+}
+</script>
 
 </body>
 </html>
