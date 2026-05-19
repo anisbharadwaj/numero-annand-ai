@@ -1,17 +1,9 @@
-<script>
-async function checkBackend() {
-  const url = document.getElementById("backendUrl").value.trim();
-
-  try {
-    const res = await fetch(url + "/health");
-    const data = await res.json();
-
-    document.getElementById("status").innerText =
-      "Status: " + (data.status || "error");
-
-  } catch (err) {
-    document.getElementById("status").innerText =
-      "Status: offline";
-  }
-}
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+</head>
+<body>
+  <h1>Frontend is working ✅</h1>
+</body>
+</html>
