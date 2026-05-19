@@ -2,8 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-fastapi
-uvicorn[standard]
 
 # allow frontend (Vercel) to call backend
 app.add_middleware(
