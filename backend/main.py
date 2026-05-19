@@ -1,11 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import os
 
-app = FastAPI(title="Premium Anis AI")
+from auth import authenticate_user, create_token, decode_token
 
-# CORS (Vercel frontend support)
+app = FastAPI(title="ULTRA AI SYSTEM")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,34 +14,55 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---------- MODELS ----------
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 class ChatRequest(BaseModel):
     message: str
+    token: str
 
-@app.get("/")
-def home():
-    return {"status": "ok", "message": "Premium AI Backend Running"}
+# ---------- LOGIN ----------
+@app.post("/login")
+def login(req: LoginRequest):
+    user = authenticate_user(req.username, req.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
+    token = create_token({"user": req.username})
+    return {"token": token}
 
-# 🔥 SIMULATED PREMIUM AI ENGINE (no API crash issues)
+# ---------- AUTH CHECK ----------
+def verify_user(token: str):
+    data = decode_token(token)
+    if not data:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return data
+
+# ---------- ULTRA AI ENGINE ----------
 def ai_engine(text: str):
     text = text.lower()
 
     if "hello" in text:
-        return "👋 Hello! I’m your Premium AI Assistant."
+        return "👋 Hello! I am Ultra AI System."
+    if "who are you" in text:
+        return "🤖 I am your secure AI assistant with login protection."
     if "name" in text:
-        return "🤖 I am Anis Premium AI System."
-    if "help" in text:
-        return "🧠 I can answer questions, explain topics, and assist you."
-    
-    return f"✨ Premium AI Response: {text}"
+        return "🧠 Ultra AI System (Protected Mode)"
 
+    return f"✨ AI Response: {text}"
+
+# ---------- CHAT ----------
 @app.post("/chat")
 def chat(req: ChatRequest):
-    try:
-        reply = ai_engine(req.message)
-        return {"reply": reply}
-    except Exception as e:
-        return {"reply": f"System Error: {str(e)}"}
+    verify_user(req.token)
+    return {"reply": ai_engine(req.message)}
+
+@app.get("/")
+def root():
+    return {"status": "ok", "system": "ULTRA AI ACTIVE"}
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
