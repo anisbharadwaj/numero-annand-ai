@@ -9,11 +9,16 @@ class User(BaseModel):
     username: str
     password: str
 
+# REGISTER
 @router.post("/register")
 def register(user: User):
-    users[user.username] = user.password
-    return {"msg": "registered"}
+    if user.username in users:
+        raise HTTPException(400, "User already exists")
 
+    users[user.username] = user.password
+    return {"msg": "registered successfully"}
+
+# LOGIN
 @router.post("/login")
 def login(user: User):
     if user.username not in users:
