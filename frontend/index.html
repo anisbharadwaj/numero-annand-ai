@@ -3,36 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Chat System</title>
+<title>Premium AI System</title>
 
 <style>
 body {
   margin: 0;
   font-family: Arial;
-  background: #0a0f1f;
+  background: radial-gradient(circle, #0b1020, #05060f);
   color: white;
 }
 
+/* HEADER */
 .header {
-  background: #111827;
-  padding: 15px;
   text-align: center;
+  padding: 15px;
+  font-size: 20px;
   font-weight: bold;
   color: #00f5ff;
+  border-bottom: 1px solid #1f2937;
 }
 
+/* CHAT BOX */
 .chat {
-  height: 80vh;
+  height: 78vh;
   overflow-y: auto;
-  padding: 10px;
+  padding: 15px;
 }
 
+/* MESSAGE */
 .msg {
-  padding: 10px;
+  padding: 12px;
   margin: 10px;
-  border-radius: 10px;
+  border-radius: 12px;
   max-width: 70%;
-  word-wrap: break-word;
+  animation: fade 0.3s ease-in-out;
+}
+
+@keyframes fade {
+  from {opacity:0; transform: translateY(10px);}
+  to {opacity:1; transform: translateY(0);}
 }
 
 .user {
@@ -40,52 +49,88 @@ body {
   color: black;
   margin-left: auto;
   text-align: right;
+  box-shadow: 0 0 15px #00f5ff;
 }
 
 .ai {
   background: #1f2937;
+  border: 1px solid #374151;
 }
 
+/* INPUT */
 .input-box {
   display: flex;
   padding: 10px;
-  background: #111827;
+  background: #0f172a;
+  border-top: 1px solid #1f2937;
 }
 
 input {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
+  border-radius: 8px;
   border: none;
   outline: none;
-  border-radius: 5px;
+  background: #111827;
+  color: white;
 }
 
 button {
   margin-left: 10px;
-  padding: 10px 15px;
-  background: #00f5ff;
+  padding: 12px 18px;
+  background: linear-gradient(90deg, #00f5ff, #008cff);
   border: none;
   cursor: pointer;
   font-weight: bold;
-  border-radius: 5px;
+  border-radius: 8px;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* LOADING */
+.loading {
+  color: #00f5ff;
+  font-style: italic;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">⚡ ANIS AI CHAT SYSTEM</div>
+<div class="header">⚡ PREMIUM ANIS AI SYSTEM</div>
 
 <div class="chat" id="chat"></div>
 
 <div class="input-box">
-  <input id="msg" placeholder="Ask something..." />
+  <input id="msg" placeholder="Ask anything..." />
   <button onclick="send()">Send</button>
 </div>
 
 <script>
-/* ✅ YOUR REAL BACKEND (RENDER) */
 const backend = "https://protected-ethical-anis-ai-12.onrender.com";
+
+function add(text, type) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  document.getElementById("chat").appendChild(div);
+  document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+}
+
+function loading() {
+  const div = document.createElement("div");
+  div.className = "msg ai loading";
+  div.innerText = "Thinking...";
+  div.id = "loading";
+  document.getElementById("chat").appendChild(div);
+}
+
+function removeLoading() {
+  const el = document.getElementById("loading");
+  if (el) el.remove();
+}
 
 async function send() {
   const input = document.getElementById("msg");
@@ -93,32 +138,27 @@ async function send() {
 
   if (!text) return;
 
-  addMessage(text, "user");
+  add(text, "user");
   input.value = "";
+
+  loading();
 
   try {
     const res = await fetch(backend + "/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message: text })
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({message: text})
     });
 
     const data = await res.json();
-    addMessage(data.reply, "ai");
+
+    removeLoading();
+    add(data.reply, "ai");
 
   } catch (err) {
-    addMessage("⚠️ Backend Error. Check Render server.", "ai");
+    removeLoading();
+    add("⚠️ Server error. Check backend.", "ai");
   }
-}
-
-function addMessage(text, type) {
-  const div = document.createElement("div");
-  div.className = "msg " + type;
-  div.innerText = text;
-  document.getElementById("chat").appendChild(div);
-  document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
 }
 </script>
 
