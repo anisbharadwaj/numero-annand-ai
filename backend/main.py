@@ -3,7 +3,6 @@ import time
 import logging
 from fastapi import FastAPI, Depends, HTTPException, status, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -20,42 +19,35 @@ from auth import (
     DEFAULT_ADMIN_EMAIL
 )
 
-# Initialize System Logs
+# Core Logging Infrastructure
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("AnisAISystem")
 
-# Rate Limiter Setup
+# Anti-DDoS Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="ANIS AI Secure System Backend", version="2.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS Security Setup
-ALLOWED_ORIGINS = [
-    "http://localhost:5500",
-    "[http://127.0.0.1:5500](http://127.0.0.1:5500)",
-    "[https://protected-ethical-anis-ai.vercel.app](https://protected-ethical-anis-ai.vercel.app)", # Replace with your actual Vercel URL
-]
+# Secure Cross-Origin Resource Sharing (CORS) Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Tighten down to ALLOWED_ORIGINS after confirming Vercel production domains
+    allow_origins=["*"],  # Allows smooth testing across both dynamic Vercel previews & production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize Gemini Client
-# It automatically picks up the GEMINI_API_KEY environment variable
+# Initialize Google Gemini Client Core
 try:
+    # Google's official modern SDK automatically reads the GEMINI_API_KEY environment variable
     ai_client = genai.Client()
 except Exception as e:
-    logger.error(f"Failed to initialize Gemini Client: {e}")
+    logger.error(f"Failed to initialize Gemini Client engine: {e}")
     ai_client = None
 
-# Track System Startup for Uptime
 START_TIME = time.time()
 
-# Request Schemas
 class ChatQuery(BaseModel):
     message: str
     history: list = []
@@ -80,37 +72,35 @@ def login(
     password: str = Form(...),
     captcha_verified: bool = Form(...)
 ):
-    # Automated Bot/Captcha Check Assertion
     if not captcha_verified:
-        raise HTTPException(status_code=400, detail="Bot activity detected. Anti-hacker human verification failed.")
+        raise HTTPException(status_code=400, detail="Perimeter Breach: Anti-Bot validation failed.")
     
     target_email = os.getenv("ADMIN_EMAIL", DEFAULT_ADMIN_EMAIL)
     
-    # Secure Time-Constant-Like Validation Check
     if username != target_email or not verify_password(password, ADMIN_PASSWORD_HASH):
-        logger.warning(f"Unauthorized access attempt detected on username: {username}")
+        logger.warning(f"Unauthorized intrusion blocked for identity: {username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Access Denied. Invalid Admin Credentials or Token."
+            detail="Access Denied: Invalid cryptographic token signature."
         )
     
     access_token = create_access_token(data={"sub": username})
-    logger.info(f"Admin successfully authenticated: {username}")
+    logger.info(f"Root authorization node unlocked for: {username}")
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/api/chat")
 @limiter.limit("30/minute")
 def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depends(get_current_user)):
     if not ai_client:
-        raise HTTPException(status_code=503, detail="AI Service currently offline or API key missing.")
+        raise HTTPException(status_code=503, detail="AI Processing Array is offline. Validate GEMINI_API_KEY variable configuration.")
     
-    # Input validation / Cross-Site Scripting (XSS) basic mitigation
+    # Input Sanitization against basic HTML injection
     sanitized_input = query.message.replace("<script>", "").replace("</script>", "").strip()
     if not sanitized_input:
-        raise HTTPException(status_code=400, detail="Empty transmission payload detected.")
+        raise HTTPException(status_code=400, detail="Null payload transmission intercepted.")
 
     try:
-        # Reconstruct chat memory context for the Gemini SDK
+        # Re-compile context history structural maps
         contents = []
         for turn in query.history:
             role = "user" if turn.get("role") == "user" else "model"
@@ -119,21 +109,19 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
                 parts=[types.Part.from_text(text=turn.get("text", ""))]
             ))
         
-        # Append the current fresh message
         contents.append(types.Content(role="user", parts=[types.Part.from_text(text=sanitized_input)]))
 
-        # Request intelligence output from gemini-2.5-flash
         response = ai_client.models.generate_content(
             model='gemini-2.5-flash',
             contents=contents,
             config=types.GenerateContentConfig(
-                system_instruction="You are Anis AI, an advanced cyber security intelligence core. Give expert, direct answers. Do not mirror back what the user says.",
-                max_output_tokens=800,
+                system_instruction="You are Anis AI, a highly intelligent cybersecurity core terminal assistant. Provide contextual responses. Do not echo or parrot the user input back to them.",
+                max_output_tokens=1000,
                 temperature=0.7
             )
         )
         
         return {"response": response.text}
     except Exception as e:
-        logger.error(f"GenAI Core Error: {str(e)}")
-        raise HTTPException(status_code=500, detail="An error occurred within the AI Generation Engine.")
+        logger.error(f"GenAI Core Generation Exception: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal anomaly processing logic sequence.")
