@@ -1,28 +1,31 @@
-from datetime import datetime, timedelta
-from jose import jwt, JWTError
+from sqlalchemy import Column, String
+from passlib.context import CryptContext
+from database import Base, engine, SessionLocal
 
-SECRET_KEY = "ultra-secret-key-123"
-ALGORITHM = "HS256"
+# password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# ✅ SIMPLE FAKE DB (NO bcrypt = NO crash)
-USERS = {
-    "admin": "admin123"
-}
+# USER TABLE
+class User(Base):
+    __tablename__ = "users"
 
-def authenticate_user(username, password):
-    if username in USERS and USERS[username] == password:
-        return {"username": username}
-    return None
+    username = Column(String, primary_key=True, index=True)
+    password = Column(String)
 
-def create_token(data: dict, expires_minutes=60):
-    payload = data.copy()
-    payload.update({
-        "exp": datetime.utcnow() + timedelta(minutes=expires_minutes)
-    })
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+Base.metadata.create_all(bind=engine)
 
-def decode_token(token: str):
+# DB session
+def get_db():
+    db = SessionLocal()
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    except JWTError:
-        return None
+        yield db
+    finally:
+        db.close()
+
+# hash password
+def hash_password(password):
+    return pwd_context.hash(password)
+
+# verify password
+def verify_password(plain, hashed):
+    return pwd_context.verify(plain, hashed)
