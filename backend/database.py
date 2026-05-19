@@ -9,7 +9,14 @@ MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/anis_ai_secure")
 
 try:
     db_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-    db = db_client.get_default_database() or db_client["anis_ai_secure"]
+    
+    # FIX: Explicitly check for None to avoid truth-value testing exceptions
+    default_db = db_client.get_default_database()
+    if default_db is not None:
+        db = default_db
+    else:
+        db = db_client["anis_ai_secure"]
+        
     db_client.server_info()
     logger.info("MongoDB Connection Matrix Online.")
 except ConnectionFailure:
