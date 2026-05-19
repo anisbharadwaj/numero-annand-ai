@@ -1,8 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from openai import OpenAI
-import os
+from auth import router as auth_router
 
 app = FastAPI()
 
@@ -14,32 +12,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+app.include_router(auth_router)
 
-# ---------- MODELS ----------
-class Chat(BaseModel):
-    message: str
-
-# ---------- AI ROUTE ----------
-@app.post("/chat")
-def chat(data: Chat):
-
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a helpful AI assistant."},
-                {"role": "user", "content": data.message}
-            ]
-        )
-
-        return {
-            "reply": response.choices[0].message.content
-        }
-
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
+@app.get("/")
+def root():
+    return {"status": "ok"}
 
 @app.get("/health")
 def health():
