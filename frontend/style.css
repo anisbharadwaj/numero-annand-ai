@@ -1,62 +1,128 @@
-/* Biometric Security Enhancements */
-.biometric-selection-box {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin: 24px 0;
+:root {
+    --bg-black: #05070c;
+    --neon-blue: #0052cc;
+    --neon-cyan: #00e5ff;
+    --panel-glass: rgba(8, 11, 22, 0.85);
+    --border-glow: rgba(0, 229, 255, 0.15);
 }
 
-.bio-card {
-    background: rgba(4, 7, 13, 0.9);
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-black);
+    color: #e0e6ed;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-glow);
+    background: rgba(0,0,0,0.5);
+}
+
+.neon-text {
+    color: #fff;
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-blue);
+    margin: 0;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.viewport-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+}
+
+.glass-panel {
+    background: var(--panel-glass);
     border: 1px solid var(--border-glow);
-    padding: 24px;
     border-radius: 8px;
-    width: 150px;
-    text-align: center;
-    cursor: pointer;
+    padding: 30px;
+    box-shadow: 0 0 30px rgba(0, 82, 204, 0.2);
+    backdrop-filter: blur(12px);
+    width: 100%;
+    max-width: 460px;
+    transition: all 0.3s ease;
+}
+
+#dashboard-screen.glass-panel {
+    max-width: 1200px;
+}
+
+.hidden { display: none !important; }
+
+.input-group {
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.25s ease;
 }
 
-.bio-card:hover {
-    border-color: var(--neon-cyan);
-    background: rgba(0, 243, 255, 0.05);
-    transform: translateY(-2px);
-}
+.input-group label { margin-bottom: 8px; color: var(--neon-cyan); font-weight: bold; }
 
-.hardware-icon-glow {
-    font-size: 2.2rem;
-    color: var(--neon-cyan);
-    filter: drop-shadow(0 0 8px var(--neon-glow-cyan));
-}
-
-.scanner-simulation {
-    position: relative;
-    background: #02050a;
+.input-group input {
+    background: #020306;
     border: 1px solid var(--neon-blue);
-    border-radius: 6px;
-    padding: 16px;
-    text-align: center;
-    overflow: hidden;
-    margin-top: 15px;
+    padding: 12px;
+    color: #fff;
+    border-radius: 4px;
+    outline: none;
+    font-family: inherit;
 }
 
-.scanning-laser {
+.input-group input:focus { border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0,229,255,0.3); }
+
+.captcha-container { margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; }
+.captcha-label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+
+.cyber-btn {
     width: 100%;
-    height: 3px;
-    background: var(--neon-cyan);
-    box-shadow: 0 0 12px var(--neon-cyan);
-    position: absolute;
-    top: 0;
-    left: 0;
-    animation: scanAnimation 2s infinite linear;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: inset 0 0 10px rgba(0,229,255,0.2), 0 0 10px rgba(0,229,255,0.2);
+    transition: all 0.2s ease;
 }
+.cyber-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px var(--neon-cyan); }
 
-@keyframes scanAnimation {
-    0% { top: 0%; }
-    50% { top: 100%; }
-    100% { top: 0%; }
+.ai-report-box { background: #010205; border-left: 3px solid var(--neon-cyan); padding: 15px; margin: 15px 0; font-size: 0.9rem; }
+
+.biometric-box { display: flex; margin-top: 20px; }
+.bio-card {
+    flex: 1;
+    background: #000;
+    border: 1px solid var(--neon-blue);
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
 }
+.bio-card:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0,229,255,0.2); }
+
+.hardware-icon-glow { font-size: 2.5rem; display: block; margin-bottom: 10px; color: var(--neon-blue); }
+.bio-card:hover .hardware-icon-glow { color: var(--neon-cyan); }
+
+.scanner-simulation { position: relative; height: 50px; background: #000; margin-top: 20px; overflow: hidden; border: 1px solid var(--neon-cyan); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--neon-cyan); }
+.scanning-laser { width: 100%; height: 2px; background: var(--neon-cyan); position: absolute; animation: scan 1.5s infinite linear; box-shadow: 0 0 8px var(--neon-cyan); }
+
+@keyframes scan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
+
+.dashboard-grid { display: grid; grid-template-columns: 320px 1fr; gap: 25px; }
+.status-card { display: flex; justify-content: space-between; padding: 12px; background: rgba(0,0,0,0.4); margin-bottom: 10px; border-radius: 4px; border: 1px solid #0f172a; }
+.activity-log-box { background: #000; height: 310px; overflow-y: auto; padding: 12px; font-size: 0.8rem; border: 1px solid #1e293b; color: #10b981; }
+
+.chat-main-terminal { display: flex; flex-direction: column; }
+.chat-output-area { background: rgba(0, 0, 0, 0.6); height: 400px; overflow-y: auto; padding: 20px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #1e293b; }
+.chat-output-area div { margin-bottom: 12px; line-height: 1.5; }
+.chat-input-container { display: flex; gap: 12px; }
+.chat-input-container input { flex: 1; padding: 14px; background: #000; border: 1px solid var(--neon-blue); color: white; border-radius: 4px; font-family: inherit; }
+.chat-input-container input:focus { border-color: var(--neon-cyan); outline: none; }
+.send-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 0 25px; cursor: pointer; border-radius: 4px; }
+.send-btn:hover { background: var(--neon-cyan); color: #000; }
