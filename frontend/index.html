@@ -3,95 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANIS-AI-SHIELD - Zero-Trust Terminal</title>
+    <title>ANIS-AI-SHIELD | Access Gateway</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <header>
-        <div class="logo-container">
-            <span class="pulse-dot"></span>
-            <h1 class="neon-text">ANIS-AI-SHIELD</h1>
-        </div>
-    </header>
+    <div class="container">
+        <header>
+            <h1 class="logo">ANIS-AI-SHIELD</h1>
+        </header>
 
-    <main class="viewport-container">
-        
         <section id="auth-screen" class="glass-panel">
             <div class="panel-header">
                 <i class="fas fa-terminal security-glow"></i>
                 <h2>SECURE SYSTEM PROFILER</h2>
             </div>
+            
+            <div class="auth-instructions" style="font-size: 0.85rem; color: #888; margin-bottom: 20px; border-left: 2px solid #00f2ff; padding-left: 10px;">
+                <p><strong>REQUIRED FOR SYSTEM ENTRY:</strong></p>
+                <ul style="margin: 5px 0; padding-left: 15px;">
+                    <li><strong>Registered Identity:</strong> Enter your verified operator email address.</li>
+                    <li><strong>Access Phrase:</strong> Enter your unique secure passphrase.</li>
+                    <li><strong>Ethical Signature:</strong> You must toggle the ethical confirmation box to initialize the Neural Threat Profiler.</li>
+                </ul>
+            </div>
+
             <form id="login-form">
                 <div class="input-group">
-                    <label for="email"><i class="fas fa-id-badge"></i> Render User ID / Email</label>
-                    <input type="email" id="email" required placeholder="operator@render.com" autocomplete="off">
+                    <label for="email"><i class="fas fa-id-badge"></i> Operator Email</label>
+                    <input type="email" id="email" required placeholder="operator@anisai.local">
                 </div>
+
                 <div class="input-group">
-                    <label for="password"><i class="fas fa-shield-alt"></i> Access Phrase</label>
-                    <input type="password" id="password" required placeholder="••••••••••••">
+                    <label for="password"><i class="fas fa-lock"></i> Access Phrase</label>
+                    <input type="password" id="password" required placeholder="••••••••">
                 </div>
-                <div class="captcha-container">
-                    <label class="captcha-label">
-                        <input type="checkbox" id="captcha-check" required>
-                        <span class="captcha-text">Confirm Ethical Operator Signature</span>
-                    </label>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="captcha_verified" required>
+                    <label for="captcha_verified">Confirm Ethical Operator Signature</label>
                 </div>
-                <button type="submit" class="cyber-btn" id="login-submit-btn">PROBE AND VERIFY IDENTITY</button>
+
+                <button type="submit" class="btn-verify">PROBE AND VERIFY IDENTITY</button>
             </form>
         </section>
+    </div>
 
-        <section id="biometric-screen" class="glass-panel hidden">
-            <div class="panel-header">
-                <i class="fas fa-network-wired text-cyan"></i>
-                <h2>AI THREAT ASSESSMENT COMPLETED</h2>
-            </div>
-            <div class="ai-report-box">
-                <h4>PROFILER HANDSHAKE OUTPUT:</h4>
-                <p id="ai-report-text">Analyzing network telemetry signature package...</p>
-            </div>
-            <div class="biometric-box">
-                <div class="bio-card" id="scan-fingerprint-btn">
-                    <i class="fas fa-fingerprint hardware-icon-glow"></i>
-                    <span>HARDWARE BIOMETRIC VERIFY</span>
-                </div>
-            </div>
-            <div id="hardware-scanner-overlay" class="scanner-simulation hidden">
-                <div class="scanning-laser"></div>
-                <p id="scanner-status-text">INITIALIZING QUANTUM ENCLAVE MAPPING...</p>
-            </div>
-        </section>
-
-        <section id="dashboard-screen" class="glass-panel hidden">
-            <div class="dashboard-grid">
-                <div class="diagnostic-sidebar">
-                    <h3>SYSTEM TELEMETRY</h3>
-                    <div class="status-card">
-                        <span class="lbl">GATEWAY STATE</span>
-                        <span class="val text-cyan">PROTECTED</span>
-                    </div>
-                    <div class="status-card">
-                        <span class="lbl">PING LATENCY</span>
-                        <span class="val text-blue" id="lbl-latency">-- ms</span>
-                    </div>
-                    <div class="activity-log-box">
-                        <h4>REAL-TIME INFRASTRUCTURE SECURITY AUDITS</h4>
-                        <div id="terminal-logs" class="terminal-body"></div>
-                    </div>
-                </div>
-
-                <div class="chat-main-terminal">
-                    <h3>ANIS-AI-SHIELD CORE MANAGEMENT ENGINE</h3>
-                    <div id="main-chat-output" class="chat-output-area"></div>
-                    <form id="main-chat-form" class="chat-input-container">
-                        <input type="text" id="main-chat-input" placeholder="Query secure system variables..." required autocomplete="off">
-                        <button type="submit" class="send-btn"><i class="fas fa-shield-virus"></i></button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </main>
-
+    <script src="script.js"></script>
 </body>
 </html>
