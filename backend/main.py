@@ -1,19 +1,18 @@
 import os
-import time
 import logging
 import secrets
-from fastapi import FastAPI, Depends, HTTPException, status, Form, Request
+from fastapi import FastAPI, Depends, HTTPException, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Security and Rate Limiting
+# Security and Rate Limiting Imports
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
+# AI and Database Imports
 from google import genai
 from google.genai import types
-
 from auth import verify_password, create_access_token, get_current_user
 from database import get_user_profile, log_login_event, save_chat_session
 
@@ -29,6 +28,7 @@ app = FastAPI(title="ANIS-AI-SHIELD Core", version="3.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# CORS Configuration
 ALLOWED_ORIGINS = [
     "https://protected-ethical-anis-ai-12.onrender.com",
     "http://127.0.0.1:5500",
@@ -47,9 +47,10 @@ app.add_middleware(
 try:
     ai_client = genai.Client()
 except Exception as e:
-    logger.error(f"AI Matrix Interface down: {e}")
+    logger.error(f"AI Matrix Interface failure: {e}")
     ai_client = None
 
+# In-memory storage for pending biometric verification
 PENDING_BIOMETRIC_CHALLENGES = {}
 
 class ChatQuery(BaseModel):
@@ -138,4 +139,4 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
         return {"response": response.text}
     except Exception as e:
         logger.error(f"Chat processing error: {e}")
-        raise HTTPException(status_code=500, detail="Internal processing error.")
+        raise HTTPException(status_code=500, detail="Internal processing error computing data streams.")
