@@ -1,15 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from jose import jwt
-from datetime import datetime, timedelta
 
-from database import SessionLocal
-from auth import User, hash_password, verify_password
+from db import users, messages
+from auth import decode_token
 
 app = FastAPI()
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,87 +14,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-SECRET_KEY = "super-secret-key"
-ALGORITHM = "HS256"
+# 🔥 MEMORY AI ENGINE
+def get_memory(user):
+    chat_history = messages.find({"user": user}).sort("_id", -1).limit(10)
+    return list(chat_history)
 
-# ---------------- MODELS ----------------
-class RegisterRequest(BaseModel):
-    username: str
-    password: str
+def ai_engine(user, msg):
+    history = get_memory(user)
 
-class LoginRequest(BaseModel):
-    username: str
-    password: str
+    context = " ".join([h["message"] for h in history])
 
-class ChatRequest(BaseModel):
-    message: str
-    token: str
+    return f"🤖 AI (memory-aware): {msg} | Context: {context[-200:]}"
 
-# ---------------- DB ----------------
-def get_db():
-    db = SessionLocal()
-    try:
-        return db
-    finally:
-        db.close()
-
-# ---------------- REGISTER ----------------
-@app.post("/register")
-def register(req: RegisterRequest):
-    db = SessionLocal()
-
-    user = db.query(User).filter(User.username == req.username).first()
-
-    if user:
-        raise HTTPException(status_code=400, detail="User already exists")
-
-    new_user = User(
-        username=req.username,
-        password=hash_password(req.password)
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.close()
-
-    return {"message": "User registered successfully"}
-
-# ---------------- LOGIN ----------------
-@app.post("/login")
-def login(req: LoginRequest):
-    db = SessionLocal()
-
-    user = db.query(User).filter(User.username == req.username).first()
-
-    if not user or not verify_password(req.password, user.password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
-    token = jwt.encode(
-        {
-            "sub": user.username,
-            "exp": datetime.utcnow() + timedelta(hours=2)
-        },
-        SECRET_KEY,
-        algorithm=ALGORITHM
-    )
-
-    db.close()
-    return {"token": token}
-
-# ---------------- CHAT ----------------
 @app.post("/chat")
-def chat(req: ChatRequest):
-    try:
-        jwt.decode(req.token, SECRET_KEY, algorithms=[ALGORITHM])
-    except:
-        raise HTTPException(status_code=401, detail="Invalid token")
+def chat(req: dict):
 
-    return {"reply": f"AI Response: {req.message}"}
+    data = decode_token(req["token"])
+    if not data:
+        raise HTTPException(401, "invalid token")
 
-@app.get("/")
-def root():
-    return {"status": "ok", "message": "AI System Running"}
+    user = data["user"]
+    msg = req["message"]
 
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
+    reply = ai_engine(user, msg)
+
+    messages.insert_one({
+        "user": user,
+        "message": msg,
+        "reply": reply
+    })
+
+    return {"reply": reply}
