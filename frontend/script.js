@@ -1,18 +1,16 @@
 // Global System Configurations
-// Change this to your deployed Render URL (e.g., [https://your-app.onrender.com](https://your-app.onrender.com))
-const API_BASE_URL = "[http://127.0.0.1:8000](http://127.0.0.1:8000)"; 
+// IMPORTANT: Replace this address with your real live Render Web Service URL once deployed!
+const API_BASE_URL = "https://protected-ethical-anis-ai.onrender.com"; 
 
 let authToken = localStorage.getItem("anis_ai_token") || null;
 let chatMemory = [];
 let widgetMemory = [];
 
-// DOM Element Registry
 const authScreen = document.getElementById("auth-screen");
 const dashboardScreen = document.getElementById("dashboard-screen");
 const loginForm = document.getElementById("login-form");
 const terminalLogs = document.getElementById("terminal-logs");
 
-// Boot / Authentication Checking Cycle
 document.addEventListener("DOMContentLoaded", () => {
     if (authToken) {
         showDashboard();
@@ -21,19 +19,18 @@ document.addEventListener("DOMContentLoaded", () => {
     setupDashboardEvents();
 });
 
-// Toast System Notification Manager
 function showNotification(message, type = "blue") {
     const container = document.getElementById("toast-container");
     const toast = document.createElement("div");
     toast.className = `toast`;
-    toast.style.borderLeftColor = type === "cyan" ? "#00f3ff" : type === "red" ? "#ff3838" : "#0077ff";
+    toast.style.borderLeftColor = type === "cyan" ? "#00f3ff" : type === "red" ? "#ff3333" : "#0066ff";
     toast.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
     container.appendChild(toast);
     
     setTimeout(() => {
         toast.style.opacity = "0";
-        toast.style.transition = "opacity 0.5s";
-        setTimeout(() => toast.remove(), 500);
+        toast.style.transition = "opacity 0.4s";
+        setTimeout(() => toast.remove(), 400);
     }, 4000);
 }
 
@@ -45,7 +42,6 @@ function writeLog(text) {
     terminalLogs.scrollTop = terminalLogs.scrollHeight;
 }
 
-// Security Authentication Controller
 loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value;
@@ -54,7 +50,7 @@ loginForm.addEventListener("submit", async (e) => {
 
     const btn = document.getElementById("login-submit-btn");
     btn.disabled = true;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> RUNNING COGNITIVE CHECK...`;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> RUNNING DECRYPTION CHECK...`;
 
     const formData = new FormData();
     formData.append("username", email);
@@ -69,18 +65,18 @@ loginForm.addEventListener("submit", async (e) => {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.detail || "Authentication Vector Failure.");
+            throw new Error(errorData.detail || "Authentication Failed.");
         }
 
         const data = await response.json();
         authToken = data.access_token;
         localStorage.setItem("anis_ai_token", authToken);
         
-        showNotification("Access Key Verified. Initializing Terminal.", "cyan");
+        showNotification("Access Key Authorized. Unlocking Terminal.", "cyan");
         showDashboard();
     } catch (err) {
         showNotification(err.message, "red");
-        writeLog(`[WARN] Access denied: ${err.message}`);
+        writeLog(`[SECURITY ALERT] Denied entry attempt: ${err.message}`);
     } finally {
         btn.disabled = false;
         btn.innerHTML = `<i class="fas fa-unlock-alt"></i> INITIALIZE DECRYPTION`;
@@ -90,18 +86,17 @@ loginForm.addEventListener("submit", async (e) => {
 function showDashboard() {
     authScreen.classList.add("hidden");
     dashboardScreen.classList.remove("hidden");
-    writeLog("[SYSTEM] Admin Dashboard layer mounted successfully.");
+    writeLog("[SYSTEM] Administrative node mounted successfully.");
     runDiagnosticCheck();
 }
 
-// Diagnostic Performance Checker Suite
 async function runDiagnosticCheck() {
-    writeLog("[DIAG] Sending handshake signal to backend...");
+    writeLog("[DIAGNOSTIC] Checking structural API cluster connection state...");
     const startTime = performance.now();
     
     try {
         const response = await fetch(`${API_BASE_URL}/health`);
-        if (!response.ok) throw new Error("Endpoint returned non-200 state.");
+        if (!response.ok) throw new Error("Health status non-200 endpoint.");
         
         const data = await response.json();
         const latency = Math.round(performance.now() - startTime);
@@ -111,23 +106,22 @@ async function runDiagnosticCheck() {
         document.getElementById("lbl-uptime").innerText = data.uptime;
         document.getElementById("lbl-latency").innerText = `${latency} ms`;
         
-        writeLog(`[OK] Handshake verified. Latency: ${latency}ms. AI Core Status: ${data.ai_connected}`);
+        writeLog(`[DIAGNOSTIC OK] Ping succeeded. Latency: ${latency}ms. AI Module Ready: ${data.ai_connected}`);
     } catch (err) {
-        document.getElementById("lbl-status").innerText = "ERROR / DISCONNECTED";
+        document.getElementById("lbl-status").innerText = "CRITICAL / DISCONNECTED";
         document.getElementById("lbl-status").className = "val text-red";
-        writeLog(`[ERROR] Backend connection severed or failing.`);
-        showNotification("Diagnostics check failed. Verification timeout.", "red");
+        writeLog(`[DIAGNOSTIC FAILED] Backend structural communication timeout.`);
+        showNotification("Security perimeter connection warning.", "red");
     }
 }
 
 function setupDashboardEvents() {
     document.getElementById("btn-check").addEventListener("click", runDiagnosticCheck);
     document.getElementById("btn-launch").addEventListener("click", () => {
-        writeLog("[SYSTEM] Re-initializing security firewalls...");
-        showNotification("Firewall systems active. Network listening standard ports.", "cyan");
+        writeLog("[SYSTEM] Flushing routing buffers and deploying virtual layers...");
+        showNotification("All operational firewalls are armed and monitoring traffic.", "cyan");
     });
 
-    // Dashboard Intelligent Chat form handler
     document.getElementById("main-chat-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const inputEl = document.getElementById("main-chat-input");
@@ -152,7 +146,7 @@ function setupDashboardEvents() {
             loader.remove();
 
             if (response.status === 401) {
-                showNotification("Session keys invalid. Relog required.", "red");
+                showNotification("Session key expired. Re-authentication sequence forced.", "red");
                 localStorage.removeItem("anis_ai_token");
                 window.location.reload();
                 return;
@@ -160,24 +154,22 @@ function setupDashboardEvents() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || "Generation failure.");
+                throw new Error(errorData.detail || "Execution generation error.");
             }
 
             const data = await response.json();
             appendMessage("main-chat-output", data.response, "ai-msg");
             
-            // Save state context memory
             chatMemory.push({ role: "user", text: prompt });
             chatMemory.push({ role: "model", text: data.response });
 
         } catch (err) {
             loader.remove();
-            appendMessage("main-chat-output", `Error executing logic: ${err.message}`, "ai-msg text-red");
+            appendMessage("main-chat-output", `Execution Interrupted: ${err.message}`, "ai-msg text-red");
         }
     });
 }
 
-// FLOATING WIDGET OPERATIONAL EMULATION
 function setupWidgetEvents() {
     const trigger = document.getElementById("widget-trigger");
     const panel = document.getElementById("widget-panel");
@@ -186,11 +178,7 @@ function setupWidgetEvents() {
 
     trigger.addEventListener("click", () => {
         panel.classList.toggle("hidden");
-        if(panel.classList.contains("hidden")) {
-            icon.className = "fas fa-comment-slash";
-        } else {
-            icon.className = "fas fa-comments text-cyan";
-        }
+        icon.className = panel.classList.contains("hidden") ? "fas fa-comment-slash" : "fas fa-comments text-cyan";
     });
 
     closeBtn.addEventListener("click", () => {
@@ -198,7 +186,6 @@ function setupWidgetEvents() {
         icon.className = "fas fa-comment-slash";
     });
 
-    // Widget Form Submit Engine
     document.getElementById("widget-chat-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const inputEl = document.getElementById("widget-input");
@@ -208,11 +195,10 @@ function setupWidgetEvents() {
         appendMessage("widget-chat-output", prompt, "user-msg");
         inputEl.value = "";
 
-        // Guardrail: Enforce authentication even inside the floating ecosystem
         if(!authToken) {
             setTimeout(() => {
-                appendMessage("widget-chat-output", "Access Alert: Core AI features require authenticated supervisor login on the main pane.", "ai-msg");
-            }, 600);
+                appendMessage("widget-chat-output", "Access Warning: Authentication on main administrative dashboard panel is required to access AI functions.", "ai-msg");
+            }, 500);
             return;
         }
 
@@ -229,7 +215,7 @@ function setupWidgetEvents() {
             });
 
             loader.remove();
-            if(!response.ok) throw new Error("Connection failed.");
+            if(!response.ok) throw new Error("Handshake drop.");
 
             const data = await response.json();
             appendMessage("widget-chat-output", data.response, "ai-msg");
@@ -238,13 +224,11 @@ function setupWidgetEvents() {
             widgetMemory.push({ role: "model", text: data.response });
         } catch(err) {
             loader.remove();
-            appendMessage("widget-chat-output", "System communication block.", "ai-msg");
+            appendMessage("widget-chat-output", "System data parsing failure.", "ai-msg");
         }
     });
 }
 
-// Helper DOM Element Renderers
- Boc
 function appendMessage(containerId, text, className) {
     const container = document.getElementById(containerId);
     const msg = document.createElement("div");
@@ -266,5 +250,5 @@ function appendTypingIndicator(containerId) {
 
 function triggerForgotNotify(e) {
     e.preventDefault();
-    showNotification("Security Protocol Override Required: Contact infrastructure architecture team to rotate secret hardware key variables.", "cyan");
+    showNotification("Security Alert: Master root password overrides must be configured directly within the host service provider dashboard settings.", "cyan");
 }
