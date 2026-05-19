@@ -3,7 +3,8 @@
   "cleanUrls": true,
   "public": true,
   "routes": [
-    { "handle": "filesystem" },
+    { "src": "/style.css", "dest": "/frontend/style.css" },
+    { "src": "/script.js", "dest": "/frontend/script.js" },
     { "src": "/(.*)", "dest": "/frontend/index.html" }
   ]
 }
