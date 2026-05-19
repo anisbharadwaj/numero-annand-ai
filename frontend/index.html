@@ -1,9 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Test</title>
+  <meta charset="UTF-8">
+  <title>Protected Ethical Anis AI</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 40px; }
+    input { padding: 10px; width: 300px; }
+    button { padding: 10px 15px; margin: 10px; cursor: pointer; }
+  </style>
 </head>
 <body>
-  <h1>Frontend is working ✅</h1>
+
+  <h1>Protected Ethical Anis AI</h1>
+
+  <input id="backendUrl" placeholder="Enter backend URL" />
+
+  <br>
+
+  <button onclick="checkBackend()">Check Backend Health</button>
+  <button onclick="launchAI()">Launch AI System</button>
+
+  <h3 id="status">Status: waiting...</h3>
+
+  <script>
+    function getURL() {
+      return document.getElementById("backendUrl").value.trim();
+    }
+
+    async function checkBackend() {
+      try {
+        const res = await fetch(getURL() + "/health");
+        const data = await res.json();
+
+        document.getElementById("status").innerText =
+          "Status: " + (data.status || "error");
+
+      } catch (e) {
+        document.getElementById("status").innerText =
+          "Status: offline";
+      }
+    }
+
+    function launchAI() {
+      window.open(getURL() + "/docs", "_blank");
+    }
+  </script>
+
 </body>
 </html>
