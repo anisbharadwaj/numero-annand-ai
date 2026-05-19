@@ -1,9 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from passlib.context import CryptContext
+import logging
 
 router = APIRouter()
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 users = {}
+
+# LOGGING
+logging.basicConfig(filename="auth.log", level=logging.INFO)
 
 class User(BaseModel):
     username: str
@@ -13,10 +20,14 @@ class User(BaseModel):
 @router.post("/register")
 def register(user: User):
     if user.username in users:
+        logging.warning("Register failed: user exists")
         raise HTTPException(400, "User already exists")
 
-    users[user.username] = user.password
-    return {"msg": "registered successfully"}
+    hashed = pwd_context.hash(user.password)
+    users[user.username] = hashed
+
+    logging.info(f"User registered: {user.username}")
+    return {"message": "registered successfully"}
 
 # LOGIN
 @router.post("/login")
@@ -24,7 +35,11 @@ def login(user: User):
     if user.username not in users:
         raise HTTPException(400, "User not found")
 
-    if users[user.username] != user.password:
-        raise HTTPException(400, "Wrong password")
+    if not pwd_context.verify(user.password, users[user.username]):
+        raise HTTPException(400, "Invalid password")
 
-    return {"token": user.username}
+    # SIMPLE TOKEN (upgrade later to JWT)
+    token = user.username + "_token"
+
+    logging.info(f"Login success: {user.username}")
+    return {"token": token}
