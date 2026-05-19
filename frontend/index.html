@@ -3,50 +3,58 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Protected Ethical Anis AI</title>
+<title>ANIS AI CORE</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", sans-serif;
-}
-
 body {
-  min-height: 100vh;
+  margin: 0;
+  height: 100vh;
+  background: #050510;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle at top, #0f172a, #020617);
-  color: white;
+  font-family: "Orbitron", sans-serif;
+  color: #00f5ff;
+  overflow: hidden;
+}
+
+/* glow background */
+body::before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: #00f5ff;
+  filter: blur(200px);
+  opacity: 0.15;
+  top: -100px;
+  left: -100px;
 }
 
 .container {
   width: 90%;
-  max-width: 600px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px;
+  max-width: 650px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 18px;
   padding: 30px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 40px rgba(0,245,255,0.2);
   text-align: center;
+  position: relative;
 }
 
 h1 {
-  font-size: 28px;
-  margin-bottom: 10px;
-  background: linear-gradient(90deg, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 26px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px #00f5ff;
 }
 
 p {
-  color: #cbd5e1;
-  font-size: 14px;
+  color: #7df9ff;
+  font-size: 13px;
   margin-bottom: 20px;
 }
 
@@ -54,53 +62,50 @@ input {
   width: 100%;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(0,0,0,0.3);
-  color: white;
+  background: transparent;
+  border: 1px solid #00f5ff;
+  color: #00f5ff;
   outline: none;
   margin-bottom: 15px;
-}
-
-input::placeholder {
-  color: #94a3b8;
+  text-align: center;
 }
 
 button {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
-  border: none;
   border-radius: 10px;
-  font-weight: 600;
+  border: none;
   cursor: pointer;
+  font-weight: bold;
+  letter-spacing: 1px;
   transition: 0.3s;
 }
 
-.primary {
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  color: white;
+.neon {
+  background: #00f5ff;
+  color: #000;
+  box-shadow: 0 0 20px #00f5ff;
 }
 
-.primary:hover {
+.neon:hover {
+  box-shadow: 0 0 40px #00f5ff;
   transform: scale(1.03);
 }
 
-.secondary {
-  background: rgba(255,255,255,0.1);
-  color: white;
-}
-
-.secondary:hover {
-  background: rgba(255,255,255,0.2);
+.darkbtn {
+  background: transparent;
+  border: 1px solid #00f5ff;
+  color: #00f5ff;
 }
 
 .status {
   margin-top: 20px;
   padding: 12px;
+  border: 1px solid rgba(0,245,255,0.3);
   border-radius: 10px;
-  background: rgba(255,255,255,0.08);
-  font-size: 14px;
-  color: #e2e8f0;
+  font-size: 13px;
+  color: #7df9ff;
 }
 </style>
 </head>
@@ -108,15 +113,15 @@ button {
 <body>
 
 <div class="container">
-  <h1>Protected Ethical Anis AI</h1>
-  <p>Advanced AI monitoring & secure intelligence system</p>
+  <h1>⚡ ANIS AI CORE SYSTEM</h1>
+  <p>Neural Intelligence • Secure Framework • Monitoring Active</p>
 
-  <input id="backendUrl" placeholder="Enter backend URL (Render link)" />
+  <input id="backendUrl" placeholder="Enter Render Backend URL"/>
 
-  <button class="primary" onclick="checkBackend()">Check Backend Health</button>
-  <button class="secondary" onclick="launchAI()">Launch AI System</button>
+  <button class="neon" onclick="checkBackend()">CHECK SYSTEM</button>
+  <button class="darkbtn" onclick="launchAI()">ENTER AI CORE</button>
 
-  <div class="status" id="status">Status: waiting...</div>
+  <div class="status" id="status">STATUS: STANDBY</div>
 </div>
 
 <script>
@@ -130,16 +135,16 @@ async function checkBackend() {
     const data = await res.json();
 
     document.getElementById("status").innerText =
-      "Status: " + (data.status || "error");
+      "STATUS: ONLINE ✔ " + JSON.stringify(data);
 
   } catch (e) {
     document.getElementById("status").innerText =
-      "Status: offline";
+      "STATUS: OFFLINE ✖";
   }
 }
 
 function launchAI() {
-  window.open(getURL() + "/docs", "_blank");
+  window.open(window.location.href, "_blank");
 }
 </script>
 
