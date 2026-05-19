@@ -1,4 +1,4 @@
-const API_BASE_URL = "YOUR_RENDER_URL_HERE"; // REPLACE THIS
+const API_BASE_URL = "https://protected-ethical-anis-ai-12.onrender.com"; // REPLACE THIS
 
 document.getElementById("login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
