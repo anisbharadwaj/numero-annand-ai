@@ -1,5 +1,3 @@
 fastapi
-uvicorn[standard]
-openai
-python-dotenv
-pymongo
+uvicorn
+pydantic
