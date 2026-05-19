@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANIS AI SYSTEM - Zero-Trust Terminal</title>
+    <title>ANIS AI SYSTEM - Identity Center</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-    <div id="toast-container"></div>
-
     <header>
         <div class="logo-container">
             <span class="pulse-dot"></span>
-            <h1 class="neon-text">⚡ ANIS AI SYSTEMS INC. ⚡</h1>
+            <h1 class="neon-text">ANIS AI SYSTEM</h1>
         </div>
     </header>
 
@@ -22,105 +20,75 @@
         
         <section id="auth-screen" class="glass-panel">
             <div class="panel-header">
-                <i class="fas fa-shield-encrypt security-glow"></i>
-                <h2>IDENTITY PERIMETER INTERFACE</h2>
+                <i class="fas fa-terminal security-glow"></i>
+                <h2>SECURE SYSTEM PROFILER</h2>
             </div>
-            <p class="panel-subtitle">Root administrative tracking dashboard entry node.</p>
-            
             <form id="login-form">
                 <div class="input-group">
-                    <label for="email"><i class="fas fa-terminal"></i> Security Identity (Email / URL)</label>
-                    <input type="text" id="email" required placeholder="https://protected-ethical-anis-ai-12.onrender.com">
+                    <label for="email"><i class="fas fa-id-badge"></i> Render User ID / Email</label>
+                    <input type="email" id="email" required placeholder="operator@render.com" autocomplete="off">
                 </div>
-                
                 <div class="input-group">
-                    <label for="password"><i class="fas fa-fingerprint"></i> System Access Phrase</label>
+                    <label for="password"><i class="fas fa-shield-alt"></i> Access Phrase</label>
                     <input type="password" id="password" required placeholder="••••••••••••">
                 </div>
-
                 <div class="captcha-container">
-                    <label class="captcha-checkbox-label">
+                    <label class="captcha-label">
                         <input type="checkbox" id="captcha-check" required>
-                        <span class="custom-checkbox"></span>
-                        <span class="captcha-text">Verify Identity Operator (AI Verification)</span>
+                        <span class="captcha-text">Confirm Ethical Operator Signature</span>
                     </label>
                 </div>
-
-                <button type="submit" class="cyber-btn btn-blue" id="login-submit-btn">
-                    <i class="fas fa-unlock"></i> INITIATE STAGE 1 VERIFICATION
-                </button>
+                <button type="submit" class="cyber-btn" id="login-submit-btn">PROBE AND VERIFY IDENTITY</button>
             </form>
         </section>
 
         <section id="biometric-screen" class="glass-panel hidden">
             <div class="panel-header">
-                <i class="fas fa-dna text-cyan"></i>
-                <h2>BIOMETRIC RECONNAISSANCE LAYER</h2>
+                <i class="fas fa-network-wired text-cyan"></i>
+                <h2>AI THREAT ASSESSMENT COMPLETED</h2>
             </div>
-            <p class="panel-subtitle">Stage 2 authentication: Hardware verification sequence requested.</p>
-            
-            <div class="biometric-selection-box">
+            <div class="ai-report-box">
+                <h4>PROFILER HANDSHAKE OUTPUT:</h4>
+                <p id="ai-report-text">Analyzing network telemetry signature package...</p>
+            </div>
+            <div class="biometric-box">
                 <div class="bio-card" id="scan-fingerprint-btn">
                     <i class="fas fa-fingerprint hardware-icon-glow"></i>
-                    <span>SCAN FINGERPRINT</span>
-                </div>
-                
-                <div class="bio-card" id="scan-face-btn">
-                    <i class="fas fa-user-scan hardware-icon-glow"></i>
-                    <span>EXECUTE FACE SCAN</span>
+                    <span>HARDWARE BIOMETRIC VERIFY</span>
                 </div>
             </div>
-
             <div id="hardware-scanner-overlay" class="scanner-simulation hidden">
                 <div class="scanning-laser"></div>
-                <p id="scanner-status-text">COMMUNICATING WITH LOCAL SECURITY ENCLAVE...</p>
+                <p id="scanner-status-text">INITIALIZING QUANTUM ENCLAVE MAPPING...</p>
             </div>
         </section>
 
         <section id="dashboard-screen" class="glass-panel hidden">
             <div class="dashboard-grid">
-                
                 <div class="diagnostic-sidebar">
-                    <div class="panel-header compact">
-                        <i class="fas fa-gauge-high"></i> <h3>LIVE CONSOLE TELEMETRY</h3>
+                    <h3>SYSTEM TELEMETRY</h3>
+                    <div class="status-card">
+                        <span class="lbl">GATEWAY STATE</span>
+                        <span class="val text-cyan">PROTECTED</span>
                     </div>
-                    
-                    <div class="status-cards">
-                        <div class="status-card">
-                            <span class="lbl">CORE NODE THREAT PROTECTION</span>
-                            <span class="val text-cyan" id="lbl-status">SECURE / ACTIVE AI SCREENING</span>
-                        </div>
-                        <div class="status-card">
-                            <span class="lbl">API TRANSLATION TIME</span>
-                            <span class="val text-blue" id="lbl-latency">-- ms</span>
-                        </div>
+                    <div class="status-card">
+                        <span class="lbl">PING LATENCY</span>
+                        <span class="val text-blue" id="lbl-latency">-- ms</span>
                     </div>
-
                     <div class="activity-log-box">
-                        <h4><i class="fas fa-list-check"></i> ISOLATED SYSTEM THREAT LOGGER</h4>
-                        <div id="terminal-logs" class="terminal-body">
-                            <div class="log-line text-muted">[SECURECORE] Systems functional. Monitoring root entries.</div>
-                        </div>
+                        <h4>REAL-TIME INFRASTRUCTURE SECURITY AUDITS</h4>
+                        <div id="terminal-logs" class="terminal-body"></div>
                     </div>
                 </div>
 
                 <div class="chat-main-terminal">
-                    <div class="panel-header compact">
-                        <i class="fas fa-code-branch"></i> <h3>AI ETHICAL CORE HUB</h3>
-                    </div>
-                    
-                    <div id="main-chat-output" class="chat-output-area">
-                        <div class="system-message">
-                            <i class="fas fa-user-secret"></i> Isolated AI terminal active. Zero outside leakage verified.
-                        </div>
-                    </div>
-                    
+                    <h3>ANIS AI CORE MANAGEMENT ENGINE</h3>
+                    <div id="main-chat-output" class="chat-output-area"></div>
                     <form id="main-chat-form" class="chat-input-container">
-                        <input type="text" id="main-chat-input" placeholder="Query system database or enter exploit scanning commands..." autocomplete="off" required>
-                        <button type="submit" class="send-btn"><i class="fas fa-shield"></i></button>
+                        <input type="text" id="main-chat-input" placeholder="Query secure system variables..." required autocomplete="off">
+                        <button type="submit" class="send-btn"><i class="fas fa-shield-virus"></i></button>
                     </form>
                 </div>
-
             </div>
         </section>
     </main>
