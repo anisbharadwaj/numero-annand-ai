@@ -1,7 +1,9 @@
-fastapi
-uvicorn
-passlib[bcrypt]
-python-jose
-email-validator
-pydantic
-python-multipart
+fastapi==0.110.0
+uvicorn==0.28.0
+google-genai==0.1.1
+pyjwt==2.8.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+slowapi==0.1.9
+pydantic==2.6.4
+pydantic-settings==2.2.1
