@@ -2,32 +2,41 @@ body, html {
     height: 100%;
     margin: 0;
     display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center;     /* Center vertically */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background-color: #0a0a0a;
     color: #fff;
     font-family: 'Courier New', Courier, monospace;
 }
 
-.container {
-    width: 100%;
-    max-width: 600px;
-    padding: 20px;
-    text-align: center;
-}
+header { padding: 20px; text-align: center; }
 
 .logo {
-    font-size: 3rem;       /* Big size */
-    font-weight: 800;      /* Bold */
-    margin-bottom: 40px;
+    font-size: 2.6rem;
+    font-weight: 900;
     letter-spacing: 5px;
+    margin: 0 auto;
     text-shadow: 0 0 10px #00f2ff;
 }
 
-.glass-panel {
-    background: rgba(20, 20, 20, 0.9);
+#auth-screen {
+    width: 100%;
+    max-width: 900px;
     padding: 40px;
+    margin: 20px;
+    background: rgba(20, 20, 20, 0.9);
     border: 1px solid #333;
-    border-radius: 15px;
-    text-align: left; /* Keep form text left-aligned */
+    border-radius: 12px;
+    text-align: left;
+}
+
+.input-group { margin-bottom: 15px; }
+input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    background: #000;
+    border: 1px solid #444;
+    color: #fff;
 }
