@@ -4,65 +4,120 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AI Chat Pro</title>
+<title>ANIS AI SYSTEM</title>
 
 <style>
+
+/* ===== GLOBAL ===== */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #0b0f1a, #05070d);
+  font-family: Arial;
+  background: radial-gradient(circle at top, #05070d, #000);
   color: white;
+  overflow: hidden;
 }
 
-/* LOGIN */
+/* ===== NEON TITLE ===== */
+.title {
+  text-align: center;
+  font-size: 40px;
+  font-weight: bold;
+  margin-top: 40px;
+  color: #00f5ff;
+  text-shadow:
+    0 0 5px #00f5ff,
+    0 0 10px #00f5ff,
+    0 0 20px #00f5ff,
+    0 0 40px #ff00d4;
+  letter-spacing: 4px;
+}
+
+/* ===== LOGIN FULL SCREEN ===== */
 .login {
   position: fixed;
   inset: 0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.login-card {
-  width: 360px;
-  padding: 25px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(0,255,255,0.2);
-  border-radius: 15px;
-  box-shadow: 0 0 25px rgba(0,255,255,0.2);
-  backdrop-filter: blur(10px);
-  text-align: center;
+/* glowing background animation */
+.login::before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0,245,255,0.2), transparent);
+  animation: pulse 4s infinite;
+  filter: blur(60px);
 }
 
-.login-card input {
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* ===== LOGIN CARD ===== */
+.login-card {
+  width: 380px;
+  padding: 25px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(0,245,255,0.3);
+  border-radius: 15px;
+  box-shadow:
+    0 0 20px rgba(0,245,255,0.3),
+    inset 0 0 10px rgba(255,0,212,0.2);
+  backdrop-filter: blur(12px);
+  z-index: 2;
+}
+
+.login-card h2 {
+  text-align: center;
+  color: #00f5ff;
+  text-shadow: 0 0 10px #00f5ff;
+}
+
+/* inputs */
+input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin: 8px 0;
   border: none;
   border-radius: 8px;
   outline: none;
+  background: #0f172a;
+  color: white;
+  border: 1px solid rgba(0,245,255,0.2);
 }
 
-.login-card button {
+/* buttons */
+button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 10px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
   background: linear-gradient(90deg, #00f5ff, #ff00d4);
+  color: black;
+  box-shadow: 0 0 15px rgba(0,245,255,0.3);
 }
 
-/* APP */
+button:hover {
+  transform: scale(1.03);
+}
+
+/* ===== CHAT ===== */
 .container {
-  display: flex;
-  height: 100vh;
   display: none;
+  height: 100vh;
 }
 
 .sidebar {
-  width: 240px;
+  width: 250px;
   background: #0f172a;
   padding: 15px;
 }
@@ -79,6 +134,7 @@ body {
   background: #111827;
   color: #00f5ff;
   font-weight: bold;
+  text-shadow: 0 0 10px #00f5ff;
 }
 
 .messages {
@@ -92,7 +148,6 @@ body {
   padding: 10px;
   border-radius: 10px;
   max-width: 70%;
-  word-wrap: break-word;
 }
 
 .user {
@@ -112,90 +167,84 @@ body {
   background: #0f172a;
 }
 
-input {
+.inputBox input {
   flex: 1;
-  padding: 10px;
-  border: none;
-  outline: none;
 }
 
-button {
-  margin-left: 8px;
-  padding: 10px;
-  border: none;
-  background: #00f5ff;
-  cursor: pointer;
-  border-radius: 6px;
-}
 </style>
 </head>
 
 <body>
 
+<!-- NEON TITLE -->
+<div class="title">⚡ ANIS AI SYSTEM ⚡</div>
+
 <!-- LOGIN -->
 <div class="login" id="loginPage">
+
   <div class="login-card">
-    <h2>⚡ AI Login</h2>
+    <h2>🔐 ACCESS PANEL</h2>
 
-    <input id="username" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
+    <input id="username" placeholder="USERNAME">
+    <input id="password" type="password" placeholder="PASSWORD">
 
-    <button onclick="register()">Register</button>
-    <button onclick="login()">Login</button>
+    <button onclick="register()">REGISTER</button>
+    <button onclick="login()">LOGIN</button>
   </div>
+
 </div>
 
-<!-- APP -->
+<!-- CHAT -->
 <div class="container" id="app">
 
   <div class="sidebar">
-    <h3>🤖 AI System</h3>
+    <h3>🤖 SYSTEM ONLINE</h3>
     <button onclick="startVoice()">🎤 Speak</button>
   </div>
 
   <div class="chat">
 
-    <div class="header">⚡ ChatGPT Style AI</div>
+    <div class="header">NEURAL AI CORE</div>
 
     <div class="messages" id="messages"></div>
 
     <div class="inputBox">
       <input id="msg" placeholder="Ask AI..." />
-      <button onclick="send()">Send</button>
+      <button onclick="send()">SEND</button>
     </div>
 
   </div>
+
 </div>
 
 <script>
 
-// 🔴 YOUR RENDER BACKEND URL
 const backend = "https://protected-ethical-anis-ai-12.onrender.com";
 
 let token = "";
 
-// ---------- REGISTER ----------
-async function register() {
+// REGISTER
+async function register(){
   await fetch(backend + "/register", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      username: username.value,
-      password: password.value
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username:username.value,
+      password:password.value
     })
   });
 
-  alert("Registered! Now login.");
+  alert("REGISTERED SUCCESSFULLY");
 }
 
-// ---------- LOGIN ----------
-async function login() {
+// LOGIN
+async function login(){
   const res = await fetch(backend + "/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      username: username.value,
-      password: password.value
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username:username.value,
+      password:password.value
     })
   });
 
@@ -206,60 +255,45 @@ async function login() {
   app.style.display = "flex";
 }
 
-// ---------- CHAT ----------
-async function send() {
+// CHAT
+async function send(){
   const text = msg.value;
-  if (!text) return;
+  if(!text) return;
 
-  add(text, "user");
+  add(text,"user");
   msg.value = "";
 
   const res = await fetch(backend + "/chat", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      token: token,
-      message: text
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      token:token,
+      message:text
     })
   });
 
   const data = await res.json();
-  add(data.reply, "ai");
-  speak(data.reply);
+  add(data.reply,"ai");
 }
 
-// ---------- UI ----------
-function add(text, type) {
+// UI
+function add(text,type){
   const div = document.createElement("div");
-  div.className = "msg " + type;
+  div.className = "msg "+type;
   div.innerText = text;
   messages.appendChild(div);
   div.scrollIntoView();
 }
 
-// ---------- VOICE ----------
-function startVoice() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  if (!SpeechRecognition) {
-    alert("Voice not supported");
-    return;
-  }
-
-  const rec = new SpeechRecognition();
-  rec.lang = "en-US";
+// VOICE
+function startVoice(){
+  const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  rec.lang="en-US";
   rec.start();
 
-  rec.onresult = (e) => {
+  rec.onresult = (e)=>{
     msg.value = e.results[0][0].transcript;
-  };
-}
-
-// ---------- SPEAK ----------
-function speak(text) {
-  const s = new SpeechSynthesisUtterance(text);
-  s.lang = "en-US";
-  window.speechSynthesis.speak(s);
+  }
 }
 
 </script>
