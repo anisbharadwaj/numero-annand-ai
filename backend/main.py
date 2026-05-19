@@ -1,11 +1,15 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from jose import jwt
+from datetime import datetime, timedelta
 
-from auth import authenticate_user, create_token, decode_token
+from database import SessionLocal
+from auth import User, hash_password, verify_password
 
-app = FastAPI(title="ULTRA AI SYSTEM")
+app = FastAPI()
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,7 +18,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------- MODELS ----------
+SECRET_KEY = "super-secret-key"
+ALGORITHM = "HS256"
+
+# ---------------- MODELS ----------------
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -23,45 +34,70 @@ class ChatRequest(BaseModel):
     message: str
     token: str
 
-# ---------- LOGIN ----------
+# ---------------- DB ----------------
+def get_db():
+    db = SessionLocal()
+    try:
+        return db
+    finally:
+        db.close()
+
+# ---------------- REGISTER ----------------
+@app.post("/register")
+def register(req: RegisterRequest):
+    db = SessionLocal()
+
+    user = db.query(User).filter(User.username == req.username).first()
+
+    if user:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    new_user = User(
+        username=req.username,
+        password=hash_password(req.password)
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.close()
+
+    return {"message": "User registered successfully"}
+
+# ---------------- LOGIN ----------------
 @app.post("/login")
 def login(req: LoginRequest):
-    user = authenticate_user(req.username, req.password)
-    if not user:
+    db = SessionLocal()
+
+    user = db.query(User).filter(User.username == req.username).first()
+
+    if not user or not verify_password(req.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_token({"user": req.username})
+    token = jwt.encode(
+        {
+            "sub": user.username,
+            "exp": datetime.utcnow() + timedelta(hours=2)
+        },
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+
+    db.close()
     return {"token": token}
 
-# ---------- AUTH CHECK ----------
-def verify_user(token: str):
-    data = decode_token(token)
-    if not data:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return data
-
-# ---------- ULTRA AI ENGINE ----------
-def ai_engine(text: str):
-    text = text.lower()
-
-    if "hello" in text:
-        return "👋 Hello! I am Ultra AI System."
-    if "who are you" in text:
-        return "🤖 I am your secure AI assistant with login protection."
-    if "name" in text:
-        return "🧠 Ultra AI System (Protected Mode)"
-
-    return f"✨ AI Response: {text}"
-
-# ---------- CHAT ----------
+# ---------------- CHAT ----------------
 @app.post("/chat")
 def chat(req: ChatRequest):
-    verify_user(req.token)
-    return {"reply": ai_engine(req.message)}
+    try:
+        jwt.decode(req.token, SECRET_KEY, algorithms=[ALGORITHM])
+    except:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    return {"reply": f"AI Response: {req.message}"}
 
 @app.get("/")
 def root():
-    return {"status": "ok", "system": "ULTRA AI ACTIVE"}
+    return {"status": "ok", "message": "AI System Running"}
 
 @app.get("/health")
 def health():
