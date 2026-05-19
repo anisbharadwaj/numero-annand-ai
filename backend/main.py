@@ -2,20 +2,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+fastapi
+uvicorn[standard]
 
-# CORS FIX (IMPORTANT FOR VERCEL)
+# allow frontend (Vercel) to call backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # later replace with your Vercel domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.get("/")
-def home():
+def root():
     return {"status": "ok", "message": "AI backend running"}
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "message": "backend healthy"}
+    return {"status": "ok"}
