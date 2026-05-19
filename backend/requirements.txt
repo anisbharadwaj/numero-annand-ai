@@ -5,3 +5,4 @@ slowapi
 google-genai
 bcrypt
 pyjwt
+passlib
