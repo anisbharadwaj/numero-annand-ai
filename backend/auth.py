@@ -1,35 +1,25 @@
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
-from passlib.context import CryptContext
 
-SECRET_KEY = "ultra-secret-key-change-this"
+SECRET_KEY = "ultra-secret-key-123"
 ALGORITHM = "HS256"
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-fake_users_db = {
-    "admin": {
-        "username": "admin",
-        "password": pwd_context.hash("admin123")
-    }
+# ✅ SIMPLE FAKE DB (NO bcrypt = NO crash)
+USERS = {
+    "admin": "admin123"
 }
 
-def verify_password(plain, hashed):
-    return pwd_context.verify(plain, hashed)
-
 def authenticate_user(username, password):
-    user = fake_users_db.get(username)
-    if not user:
-        return False
-    if not verify_password(password, user["password"]):
-        return False
-    return user
+    if username in USERS and USERS[username] == password:
+        return {"username": username}
+    return None
 
 def create_token(data: dict, expires_minutes=60):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=expires_minutes)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    payload = data.copy()
+    payload.update({
+        "exp": datetime.utcnow() + timedelta(minutes=expires_minutes)
+    })
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 def decode_token(token: str):
     try:
