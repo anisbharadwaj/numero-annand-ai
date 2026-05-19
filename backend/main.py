@@ -2,11 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
-from openai import OpenAI
 
-app = FastAPI()
+app = FastAPI(title="Premium Anis AI")
 
-# CORS (frontend access)
+# CORS (Vercel frontend support)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,34 +14,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 class ChatRequest(BaseModel):
     message: str
 
 @app.get("/")
-def root():
-    return {"status": "ok", "message": "GPT AI Backend Running"}
+def home():
+    return {"status": "ok", "message": "Premium AI Backend Running"}
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "healthy"}
 
-# 🔥 REAL AI ENDPOINT
+# 🔥 SIMULATED PREMIUM AI ENGINE (no API crash issues)
+def ai_engine(text: str):
+    text = text.lower()
+
+    if "hello" in text:
+        return "👋 Hello! I’m your Premium AI Assistant."
+    if "name" in text:
+        return "🤖 I am Anis Premium AI System."
+    if "help" in text:
+        return "🧠 I can answer questions, explain topics, and assist you."
+    
+    return f"✨ Premium AI Response: {text}"
+
 @app.post("/chat")
 def chat(req: ChatRequest):
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a helpful AI assistant."},
-                {"role": "user", "content": req.message}
-            ]
-        )
-
-        reply = response.choices[0].message.content
+        reply = ai_engine(req.message)
         return {"reply": reply}
-
     except Exception as e:
-        return {"reply": f"Error: {str(e)}"}
+        return {"reply": f"System Error: {str(e)}"}
