@@ -1,31 +1,25 @@
-from sqlalchemy import Column, String
-from passlib.context import CryptContext
-from database import Base, engine, SessionLocal
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
-# password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+router = APIRouter()
 
-# USER TABLE
-class User(Base):
-    __tablename__ = "users"
+users = {}
 
-    username = Column(String, primary_key=True, index=True)
-    password = Column(String)
+class User(BaseModel):
+    username: str
+    password: str
 
-Base.metadata.create_all(bind=engine)
+@router.post("/register")
+def register(user: User):
+    users[user.username] = user.password
+    return {"msg": "registered"}
 
-# DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@router.post("/login")
+def login(user: User):
+    if user.username not in users:
+        raise HTTPException(400, "User not found")
 
-# hash password
-def hash_password(password):
-    return pwd_context.hash(password)
+    if users[user.username] != user.password:
+        raise HTTPException(400, "Wrong password")
 
-# verify password
-def verify_password(plain, hashed):
-    return pwd_context.verify(plain, hashed)
+    return {"token": user.username}
