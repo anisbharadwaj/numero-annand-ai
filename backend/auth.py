@@ -6,16 +6,16 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 from passlib.context import CryptContext
 
-# Security Configuration
-SECRET_KEY = os.getenv("JWT_SECRET", "default_cyber_security_secret_key_99X!")
+# Cryptographic Core Settings
+SECRET_KEY = os.getenv("JWT_SECRET", "cyber-core-secret-key-99X-anis")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False)
 
-# Pre-calculated hash for fallback admin authentication
-# Password matching this hash: CyberPass2026!
+# Pre-calculated structural hash fallback for standard admin onboarding
+# Password matching this exact hash sequence below: CyberPass2026!
 DEFAULT_ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@anisai.local")
 DEFAULT_HASH = "$2b$12$R9hZHSbSI7bKXyqG09SgxeVb7Pz6K6fI6bH.vN8kR3yE5Z2A8M0WW" 
 ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", DEFAULT_HASH)
@@ -30,8 +30,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
