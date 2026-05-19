@@ -1,0 +1,43 @@
+body{
+  margin:0;
+  font-family: Arial;
+  background: radial-gradient(circle at top,#0b0f1a,#05070d);
+  color:white;
+}
+
+.login-card{
+  width:360px;
+  margin:auto;
+  margin-top:120px;
+  padding:25px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(0,255,255,0.2);
+  border-radius:15px;
+  box-shadow:0 0 20px rgba(0,255,255,0.2);
+  backdrop-filter: blur(10px);
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:linear-gradient(90deg,#00f5ff,#ff00d4);
+  border:none;
+  color:black;
+  font-weight:bold;
+  cursor:pointer;
+  border-radius:8px;
+}
+
+button:hover{
+  transform:scale(1.02);
+}
