@@ -6,3 +6,4 @@ google-genai
 bcrypt
 pyjwt
 passlib
+python-multipart
