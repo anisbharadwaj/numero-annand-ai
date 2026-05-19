@@ -1,9 +1,9 @@
 {
   "version": 2,
+  "cleanUrls": true,
+  "public": true,
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/index.html"
-    }
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/frontend/index.html" }
   ]
 }
