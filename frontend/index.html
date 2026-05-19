@@ -1,27 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>AI Chat Pro</title>
 
 <style>
 body {
   margin: 0;
-  font-family: Arial;
-  background: #0b0f1a;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #0b0f1a, #05070d);
   color: white;
 }
 
+/* LOGIN */
+.login {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  width: 360px;
+  padding: 25px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(0,255,255,0.2);
+  border-radius: 15px;
+  box-shadow: 0 0 25px rgba(0,255,255,0.2);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+}
+
+.login-card button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  background: linear-gradient(90deg, #00f5ff, #ff00d4);
+}
+
+/* APP */
 .container {
   display: flex;
   height: 100vh;
+  display: none;
 }
 
 .sidebar {
-  width: 260px;
-  background: #111827;
+  width: 240px;
+  background: #0f172a;
   padding: 15px;
 }
 
@@ -33,8 +75,8 @@ body {
 
 .header {
   padding: 15px;
-  background: #0f172a;
   text-align: center;
+  background: #111827;
   color: #00f5ff;
   font-weight: bold;
 }
@@ -50,6 +92,7 @@ body {
   padding: 10px;
   border-radius: 10px;
   max-width: 70%;
+  word-wrap: break-word;
 }
 
 .user {
@@ -66,7 +109,7 @@ body {
 .inputBox {
   display: flex;
   padding: 10px;
-  background: #111827;
+  background: #0f172a;
 }
 
 input {
@@ -82,22 +125,7 @@ button {
   border: none;
   background: #00f5ff;
   cursor: pointer;
-}
-
-.login {
-  position: fixed;
-  inset: 0;
-  background: #0b0f1a;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.login input {
-  margin: 5px;
-  padding: 10px;
-  width: 220px;
+  border-radius: 6px;
 }
 </style>
 </head>
@@ -106,17 +134,19 @@ button {
 
 <!-- LOGIN -->
 <div class="login" id="loginPage">
-  <h2>AI Login System</h2>
+  <div class="login-card">
+    <h2>⚡ AI Login</h2>
 
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
 
-  <button onclick="register()">Register</button>
-  <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
+    <button onclick="login()">Login</button>
+  </div>
 </div>
 
 <!-- APP -->
-<div class="container" id="app" style="display:none;">
+<div class="container" id="app">
 
   <div class="sidebar">
     <h3>🤖 AI System</h3>
@@ -125,7 +155,7 @@ button {
 
   <div class="chat">
 
-    <div class="header">⚡ ChatGPT AI System</div>
+    <div class="header">⚡ ChatGPT Style AI</div>
 
     <div class="messages" id="messages"></div>
 
@@ -139,6 +169,7 @@ button {
 
 <script>
 
+// 🔴 YOUR RENDER BACKEND URL
 const backend = "https://protected-ethical-anis-ai-12.onrender.com";
 
 let token = "";
@@ -154,7 +185,7 @@ async function register() {
     })
   });
 
-  alert("Registered successfully. Now login.");
+  alert("Registered! Now login.");
 }
 
 // ---------- LOGIN ----------
@@ -171,8 +202,8 @@ async function login() {
   const data = await res.json();
   token = data.token;
 
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("app").style.display = "flex";
+  loginPage.style.display = "none";
+  app.style.display = "flex";
 }
 
 // ---------- CHAT ----------
@@ -193,7 +224,6 @@ async function send() {
   });
 
   const data = await res.json();
-
   add(data.reply, "ai");
   speak(data.reply);
 }
@@ -207,7 +237,7 @@ function add(text, type) {
   div.scrollIntoView();
 }
 
-// ---------- VOICE INPUT ----------
+// ---------- VOICE ----------
 function startVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -225,7 +255,7 @@ function startVoice() {
   };
 }
 
-// ---------- VOICE OUTPUT ----------
+// ---------- SPEAK ----------
 function speak(text) {
   const s = new SpeechSynthesisUtterance(text);
   s.lang = "en-US";
