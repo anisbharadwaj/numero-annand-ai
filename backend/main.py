@@ -1,7 +1,6 @@
 import os
 import time
 import logging
-import base64
 import secrets
 from fastapi import FastAPI, Depends, HTTPException, status, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,17 +20,17 @@ from auth import (
     DEFAULT_ADMIN_EMAIL
 )
 
-# Logging Setup
+# Core Telemetry Logger Configuration
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("AnisAISystem")
 
-# Threat Mitigator (Rate Limiting)
+# Brute-Force Rate Mitigation Engine
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="ANIS AI Zero-Trust Core", version="3.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Strict Dynamic CORS Perimeter Matching Your Project URL Structure
+# Allowed Strict Cross-Origin Origins
 ALLOWED_ORIGINS = [
     "https://protected-ethical-anis-ai-12.onrender.com",
     "http://127.0.0.1:5500",
@@ -46,16 +45,13 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "X-Risk-Score-Verification"],
 )
 
-# AI Client Engine Initialization
+# AI Core Neural Grid Mount
 try:
     ai_client = genai.Client()
 except Exception as e:
-    logger.error(f"AI System Core offline: {e}")
+    logger.error(f"AI System Core hardware offline: {e}")
     ai_client = None
 
-START_TIME = time.time()
-
-# Dummy memory state for biometric validation challenges
 PENDING_BIOMETRIC_CHALLENGES = {}
 
 class ChatQuery(BaseModel):
@@ -80,12 +76,11 @@ async def secure_login(
     password: str = Form(...),
     captcha_verified: bool = Form(...)
 ):
-    # 1. Immediate Bot Detection Mitigation
+    # 1. Anti-Bot Verification
     if not captcha_verified:
-        raise HTTPException(status_code=403, detail="Anti-Bot enforcement triggered. Request isolated.")
+        raise HTTPException(status_code=403, detail="Anti-Bot validation failed. Execution halted.")
 
-    # 2. AI Threat Analysis Matrix Check
-    # This evaluates incoming connection metadata headers to screen for weaponized proxies or malicious scraping patterns
+    # 2. AI Network Behavior Profiler
     headers_dump = str(request.headers.items())
     if ai_client:
         try:
@@ -94,18 +89,18 @@ async def secure_login(
                 contents=f"Analyze these connection headers for cybersecurity threat signatures, exploit patterns, or malicious proxies. Return exactly 'SAFE' or 'MALICIOUS'. Headers: {headers_dump}",
             )
             if "MALICIOUS" in ai_assessment.text.upper():
-                logger.error(f"AI Core intercepted an attack signature from IP: {get_remote_address(request)}")
-                raise HTTPException(status_code=403, detail="AI Perimeter Protection: Connection profile flagged as high risk.")
+                logger.error(f"AI Perimeter intercepted connection profile threat signature from: {get_remote_address(request)}")
+                raise HTTPException(status_code=403, detail="AI Protection Matrix: Connection profile isolated due to malicious properties.")
         except Exception as ai_err:
-            logger.warning(f"AI Threat Assessment bypassed safely: {ai_err}")
+            logger.warning(f"AI Threat Assessment bypassed securely: {ai_err}")
 
-    # 3. Cryptographic User Validation
+    # 3. Cryptographic Account Validation
     target_email = os.getenv("ADMIN_EMAIL", DEFAULT_ADMIN_EMAIL)
     if username != target_email or not verify_password(password, ADMIN_PASSWORD_HASH):
-        logger.warning(f"Unauthorized intrusion blocked for payload destination: {username}")
-        raise HTTPException(status_code=401, detail="Access Denied: Invalid identity profile.")
+        logger.warning(f"Access breach prevented for identity target destination: {username}")
+        raise HTTPException(status_code=401, detail="Access Denied: Incongruent profile signatures.")
 
-    # 4. Generate Hardware Biometric Challenge Node (WebAuthn Pre-handshake)
+    # 4. Generate WebAuthn Hardware Security Challenge Node
     biometric_challenge = secrets.token_urlsafe(32)
     PENDING_BIOMETRIC_CHALLENGES[username] = biometric_challenge
 
@@ -119,28 +114,24 @@ async def secure_login(
 @app.post("/api/login/biometric-verify")
 @limiter.limit("5/minute")
 def verify_biometric_hardware(payload: BiometricVerifyPayload):
-    # Checks if a challenge handshake is currently active for this user session
     if payload.userEmail not in PENDING_BIOMETRIC_CHALLENGES:
-        raise HTTPException(status_code=400, detail="Handshake expired or session invalid.")
+        raise HTTPException(status_code=400, detail="Hardware verification challenge expired or invalid.")
     
-    # Clean verification challenge sequence
     del PENDING_BIOMETRIC_CHALLENGES[payload.userEmail]
     
-    # In a full-scale deployment, your cryptographic public keys unlock here via WebAuthn library.
-    # For this secure infrastructure template, we simulate hardware confirmation payload reading.
     if not payload.signature or len(payload.signature) < 10:
-        raise HTTPException(status_code=400, detail="Hardware biometric signature integrity broken.")
+        raise HTTPException(status_code=400, detail="Hardware security envelope integrity corrupted.")
 
-    # Issue full access security token
+    # Identity confirmed—issue primary terminal clearance pass
     access_token = create_access_token(data={"sub": payload.userEmail})
-    logger.info(f"System completely unlocked via Secure Hardware Verification for user: {payload.userEmail}")
+    logger.info(f"System environment completely unlocked via Biometric Core validation for admin: {payload.userEmail}")
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/api/chat")
 @limiter.limit("30/minute")
-def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depends(get_current_user)):
+def chat_assistant(query: ChatQuery, current_user: str = Depends(get_current_user)):
     if not ai_client:
-        raise HTTPException(status_code=503, detail="AI Matrix processing engine is currently offline.")
+        raise HTTPException(status_code=503, detail="AI Interface translation client is offline.")
     
     try:
         contents = []
@@ -154,10 +145,10 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
             model='gemini-2.5-flash',
             contents=contents,
             config=types.GenerateContentConfig(
-                system_instruction="You are Anis AI, an advanced AI system terminal tuned for secure systems administration and ethical hacking optimization. Provide deeply analytical, concise outputs.",
+                system_instruction="You are Anis AI, an advanced AI system terminal tuned for secure systems administration and ethical hacking optimization. Provide deeply analytical, highly concise outputs.",
                 temperature=0.4
             )
         )
         return {"response": response.text}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Anomaly detected processing execution thread.")
+        raise HTTPException(status_code=500, detail="System anomaly intercepted during query computation thread.")
