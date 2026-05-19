@@ -5,9 +5,8 @@ import time
 
 app = FastAPI()
 
-START_TIME = time.time()
+START = time.time()
 
-# CORS FIX
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,19 +19,24 @@ app.include_router(auth_router)
 
 @app.get("/")
 def root():
-    return {"status": "ok", "app": "ANIS AI SYSTEM"}
+    return {
+        "status": "ok",
+        "name": "ANIS AI SYSTEM"
+    }
 
-# ✅ HEALTH CHECK (REQUIRED)
 @app.get("/health")
 def health():
     return {
         "status": "ok",
-        "uptime": round(time.time() - START_TIME, 2),
-        "version": "v2.0"
+        "version": "v5",
+        "uptime": round(time.time() - START, 2)
     }
 
-# SIMPLE AI RESPONSE (placeholder)
 @app.post("/chat")
 def chat(data: dict):
+
     msg = data.get("message", "")
-    return {"reply": f"🤖 Anis AI: {msg}"}
+
+    return {
+        "reply": f"ANIS AI Response: {msg}"
+    }
