@@ -10,7 +10,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-# AI and Database Imports
+# AI and Database Imports (Assumes these exist in your project)
 from google import genai
 from google.genai import types
 from auth import verify_password, create_access_token, get_current_user
@@ -28,16 +28,18 @@ app = FastAPI(title="ANIS-AI-SHIELD Core", version="3.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS Configuration - Ensure your Vercel URL is included here
+# CORS Configuration - Updated to allow your Vercel frontend
 ALLOWED_ORIGINS = [
-    "*", # For testing; restrict to your actual Vercel URL in production
+    "https://anis-ai-shield-gm7f4rats-anisbharadwajs-projects.vercel.app", 
+    "http://localhost:3000",
+    "http://127.0.0.1:5500"
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -45,12 +47,13 @@ app.add_middleware(
 try:
     ai_client = genai.Client()
 except Exception as e:
-    logger.error(f"AI Matrix Interface failure: {e}")
+    logger.error(f"AI Matrix Interface unreachable: {e}")
     ai_client = None
 
-# In-memory storage for pending biometric verification
+# In-memory storage for biometric challenges
 PENDING_BIOMETRIC_CHALLENGES = {}
 
+# Pydantic Schemas
 class ChatQuery(BaseModel):
     message: str
     history: list = []
@@ -59,9 +62,10 @@ class BiometricVerifyPayload(BaseModel):
     signature: str
     userEmail: str
 
+# Endpoints
 @app.get("/health")
 def health_check():
-    return {"status": "operational", "security_tier": "zero-trust", "ai_active": ai_client is not None}
+    return {"status": "operational", "ai_active": ai_client is not None}
 
 @app.post("/api/login")
 @limiter.limit("5/minute")
@@ -75,18 +79,14 @@ async def secure_login(
     
     if not captcha_verified:
         log_login_event(username, "BLOCKED_BY_CAPTCHA", ip)
-        raise HTTPException(status_code=403, detail="Anti-Bot validation challenge failure.")
+        raise HTTPException(status_code=403, detail="Anti-Bot validation failed.")
 
     user_record = get_user_profile(username)
-    if not user_record:
-        log_login_event(username, "USER_NOT_FOUND", ip)
+    if not user_record or not verify_password(password, user_record.get("hashed_password")):
+        log_login_event(username, "INVALID_CREDENTIALS", ip)
         raise HTTPException(status_code=401, detail="Invalid access credentials.")
 
-    if not verify_password(password, user_record.get("hashed_password")):
-        log_login_event(username, "INVALID_PASSWORD", ip)
-        raise HTTPException(status_code=401, detail="Invalid access credentials.")
-
-    log_login_event(username, "STAGE_1_CLEARED", ip, "AI Assessment Passed")
+    log_login_event(username, "STAGE_1_CLEARED", ip)
     
     biometric_challenge = secrets.token_urlsafe(32)
     PENDING_BIOMETRIC_CHALLENGES[username] = biometric_challenge
@@ -103,7 +103,7 @@ async def secure_login(
 def verify_biometric_hardware(request: Request, payload: BiometricVerifyPayload):
     ip = get_remote_address(request)
     if payload.userEmail not in PENDING_BIOMETRIC_CHALLENGES:
-        raise HTTPException(status_code=400, detail="Handshake context timed out.")
+        raise HTTPException(status_code=400, detail="Challenge context timed out.")
     
     del PENDING_BIOMETRIC_CHALLENGES[payload.userEmail]
     
@@ -115,7 +115,7 @@ def verify_biometric_hardware(request: Request, payload: BiometricVerifyPayload)
 @limiter.limit("30/minute")
 def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depends(get_current_user)):
     if not ai_client:
-        raise HTTPException(status_code=503, detail="AI Core processing interface offline.")
+        raise HTTPException(status_code=503, detail="AI Core interface offline.")
     
     try:
         contents = []
@@ -136,5 +136,5 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
         save_chat_session(current_user, query.message, response.text)
         return {"response": response.text}
     except Exception as e:
-        logger.error(f"Chat processing error: {e}")
+        logger.error(f"Chat error: {e}")
         raise HTTPException(status_code=500, detail="Internal processing error.")
