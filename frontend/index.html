@@ -1,511 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>ANIS AI SYSTEM</title>
-
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-}
-
-body{
-background:#020617;
-color:white;
-overflow-x:hidden;
-}
-
-body::before{
-content:"";
-position:fixed;
-width:100%;
-height:100%;
-background:
-radial-gradient(circle at top left,#00f7ff33,transparent 30%),
-radial-gradient(circle at bottom right,#ff00ff22,transparent 30%);
-z-index:-1;
-}
-
-.header{
-padding:25px;
-text-align:center;
-font-size:42px;
-font-weight:bold;
-color:#00f7ff;
-text-shadow:0 0 20px #00f7ff;
-}
-
-.container{
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:80vh;
-}
-
-.card{
-width:420px;
-background:#0f172acc;
-padding:30px;
-border-radius:20px;
-border:1px solid #00f7ff44;
-box-shadow:0 0 25px #00f7ff33;
-backdrop-filter:blur(10px);
-}
-
-input{
-width:100%;
-padding:14px;
-margin-top:15px;
-border:none;
-border-radius:10px;
-background:#1e293b;
-color:white;
-font-size:15px;
-}
-
-button{
-width:100%;
-padding:14px;
-margin-top:18px;
-border:none;
-border-radius:10px;
-font-size:15px;
-font-weight:bold;
-cursor:pointer;
-background:linear-gradient(90deg,#00f7ff,#ff00ff);
-color:white;
-transition:0.3s;
-}
-
-button:hover{
-transform:scale(1.02);
-}
-
-.status{
-margin-top:15px;
-text-align:center;
-color:#00ff88;
-}
-
-.dashboard{
-display:none;
-padding:30px;
-}
-
-.topbar{
-display:flex;
-gap:15px;
-margin-bottom:20px;
-}
-
-.panel{
-background:#0f172a;
-padding:20px;
-border-radius:15px;
-border:1px solid #00f7ff33;
-margin-top:20px;
-}
-
-.health{
-color:#00ff88;
-margin-top:10px;
-}
-
-.chat-box{
-height:300px;
-overflow-y:auto;
-background:#111827;
-padding:15px;
-border-radius:12px;
-margin-bottom:10px;
-}
-
-.msg{
-margin:10px 0;
-padding:10px;
-border-radius:10px;
-}
-
-.user{
-background:#1e293b;
-}
-
-.ai{
-background:#00f7ff22;
-}
-
-.widget{
-position:fixed;
-right:20px;
-bottom:20px;
-width:320px;
-background:#111827;
-border-radius:20px;
-overflow:hidden;
-border:1px solid #00f7ff55;
-box-shadow:0 0 25px #00f7ff33;
-}
-
-.widget-header{
-padding:15px;
-background:#00f7ff;
-color:black;
-font-weight:bold;
-cursor:pointer;
-}
-
-.widget-body{
-display:none;
-padding:15px;
-}
-
-.voice-btn{
-background:#ff00ff;
-}
-
-.small{
-font-size:13px;
-margin-top:10px;
-color:#94a3b8;
-text-align:center;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANIS AI SYSTEM - Core Security Terminal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
 </head>
-
 <body>
 
-<div class="header">
-⚡ ANIS AI SYSTEM ⚡
-</div>
-
-<div class="container" id="authPage">
-
-<div class="card">
-
-<h2>Secure Login</h2>
-
-<input id="email" type="email" placeholder="Email">
-
-<input id="password" type="password" placeholder="Password">
-
-<div style="margin-top:15px;">
-<input type="checkbox" id="robot">
- I am Human
-</div>
-
-<button onclick="register()">
-Register
-</button>
-
-<button onclick="login()">
-Login
-</button>
-
-<div class="status" id="status"></div>
-
-<div class="small">
-Protected AI Security System
-</div>
-
-</div>
-
-</div>
-
-<div class="dashboard" id="dashboard">
-
-<div class="topbar">
-
-<button onclick="launchSystem()">
-🚀 Launch
-</button>
-
-<button onclick="healthCheck()">
-🩺 Check
-</button>
-
-<button onclick="logout()">
-Logout
-</button>
-
-</div>
-
-<div class="panel">
-
-<h2>System Status</h2>
-
-<div class="health" id="health">
-Waiting...
-</div>
-
-</div>
-
-<div class="panel">
-
-<h2>AI Chat</h2>
-
-<div class="chat-box" id="chatBox"></div>
-
-<input id="question" placeholder="Ask AI...">
-
-<button onclick="askAI()">
-Ask AI
-</button>
-
-<button class="voice-btn" onclick="voiceInput()">
-🎤 Voice Assistant
-</button>
-
-</div>
-
-</div>
-
-<div class="widget">
-
-<div class="widget-header" onclick="toggleWidget()">
-🤖 Anis AI
-</div>
-
-<div class="widget-body" id="widgetBody">
-
-<input id="widgetQuestion" placeholder="Ask AI...">
-
-<button onclick="widgetAsk()">
-Ask
-</button>
-
-<div id="widgetResponse"
-style="margin-top:10px;color:#00ff88;">
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-const API =
-"https://protected-ethical-anis-ai-12.onrender.com"
-
-function checkHuman(){
-
-if(!robot.checked){
-
-alert("Verify Human")
-
-return false
-}
-
-return true
-}
-
-async function register(){
-
-if(!checkHuman()) return
-
-const res = await fetch(API + "/register",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-email:email.value,
-password:password.value
-})
-})
-
-const data = await res.json()
-
-status.innerHTML =
-data.message || data.detail
-}
-
-async function login(){
-
-if(!checkHuman()) return
-
-const res = await fetch(API + "/login",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-email:email.value,
-password:password.value
-})
-})
-
-const data = await res.json()
-
-if(data.token){
-
-localStorage.setItem(
-"anis_token",
-data.token
-)
-
-status.innerHTML =
-"✅ Login Successful"
-
-setTimeout(()=>{
-
-authPage.style.display="none"
-
-dashboard.style.display="block"
-
-},1000)
-
-}else{
-
-status.innerHTML =
-data.detail
-}
-}
-
-async function launchSystem(){
-
-health.innerHTML =
-"🚀 Launching..."
-
-setTimeout(()=>{
-
-health.innerHTML =
-"✅ ANIS AI SYSTEM ACTIVE"
-
-},1500)
-}
-
-async function healthCheck(){
-
-const start = Date.now()
-
-const res = await fetch(API + "/health")
-
-const data = await res.json()
-
-const end = Date.now()
-
-health.innerHTML = `
-Status: ${data.status}<br>
-Version: ${data.version}<br>
-Response: ${end-start}ms
-`
-}
-
-async function askAI(){
-
-const msg = question.value
-
-chatBox.innerHTML += `
-<div class="msg user">
-👤 ${msg}
-</div>
-`
-
-const res = await fetch(API + "/chat",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:msg
-})
-})
-
-const data = await res.json()
-
-chatBox.innerHTML += `
-<div class="msg ai">
-🤖 ${data.reply}
-</div>
-`
-
-question.value=""
-
-chatBox.scrollTop =
-chatBox.scrollHeight
-
-saveMemory(msg,data.reply)
-}
-
-function saveMemory(q,a){
-
-let memory =
-JSON.parse(
-localStorage.getItem("anis_memory")
-|| "[]"
-)
-
-memory.push({
-question:q,
-answer:a
-})
-
-localStorage.setItem(
-"anis_memory",
-JSON.stringify(memory)
-)
-}
-
-function voiceInput(){
-
-const recognition =
-new webkitSpeechRecognition()
-
-recognition.lang="en-US"
-
-recognition.start()
-
-recognition.onresult = (event)=>{
-
-question.value =
-event.results[0][0].transcript
-}
-}
-
-function logout(){
-
-localStorage.clear()
-
-location.reload()
-}
-
-function toggleWidget(){
-
-widgetBody.style.display =
-widgetBody.style.display==="block"
-? "none"
-: "block"
-}
-
-async function widgetAsk(){
-
-const q =
-widgetQuestion.value
-
-const res = await fetch(API + "/chat",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:q
-})
-})
-
-const data = await res.json()
-
-widgetResponse.innerHTML =
-data.reply
-}
-
-</script>
+    <!-- Notification Toast Elements -->
+    <div id="toast-container"></div>
+
+    <!-- Header Terminal Banner -->
+    <header>
+        <div class="logo-container">
+            <span class="pulse-dot"></span>
+            <h1 class="neon-text">⚡ ANIS AI SYSTEM ⚡</h1>
+        </div>
+    </header>
+
+    <main class="viewport-container">
+        
+        <!-- SECURE AUTHENTICATION SCREEN -->
+        <section id="auth-screen" class="glass-panel">
+            <div class="panel-header">
+                <i class="fas fa-shield-halved security-glow"></i>
+                <h2>SECURE INTERFACE AUTHENTICATION</h2>
+            </div>
+            <p class="panel-subtitle">Access restricted to authorized root administrators only.</p>
+            
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="email"><i class="fas fa-user-shield"></i> Secure Identity / Admin Email</label>
+                    <input type="email" id="email" required placeholder="root@anisai.system">
+                </div>
+                
+                <div class="input-group">
+                    <label for="password"><i class="fas fa-key"></i> Cryptographic Key / Password</label>
+                    <input type="password" id="password" required placeholder="••••••••••••">
+                </div>
+
+                <!-- Cyber Verification Component -->
+                <div class="captcha-container">
+                    <label class="captcha-checkbox-label">
+                        <input type="checkbox" id="captcha-check" required>
+                        <span class="custom-checkbox"></span>
+                        <span class="captcha-text">Verify Human Operator (Anti-Bot Perimeter)</span>
+                    </label>
+                    <div class="bot-detection-tag">AI Bot Detection Enabled</div>
+                </div>
+
+                <button type="submit" class="cyber-btn btn-blue" id="login-submit-btn">
+                    <i class="fas fa-unlock-alt"></i> INITIALIZE DECRYPTION
+                </button>
+            </form>
+            <div class="auth-footer">
+                <a href="#" id="forgot-link" onclick="triggerForgotNotify(event)"><i class="fas fa-circle-info"></i> Reset Access Key Link</a>
+            </div>
+        </section>
+
+        <!-- SECURE ADMIN MANAGEMENT DASHBOARD -->
+        <section id="dashboard-screen" class="glass-panel hidden">
+            <div class="dashboard-grid">
+                
+                <!-- System Operational Diagnostics Metrics -->
+                <div class="diagnostic-sidebar">
+                    <div class="panel-header compact">
+                        <i class="fas fa-gauge-high"></i> <h3>LIVE DIAGNOSTICS</h3>
+                    </div>
+                    
+                    <div class="status-cards">
+                        <div class="status-card">
+                            <span class="lbl">SYSTEM PERIMETER</span>
+                            <span class="val security-glow" id="lbl-status">OFFLINE</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="lbl">CORE API UPTIME</span>
+                            <span class="val text-cyan" id="lbl-uptime">0s</span>
+                        </div>
+                        <div class="status-card">
+                            <span class="lbl">LATENCY MONITOR</span>
+                            <span class="val text-blue" id="lbl-latency">-- ms</span>
+                        </div>
+                    </div>
+
+                    <div class="control-actions">
+                        <button id="btn-launch" class="cyber-btn btn-cyan"><i class="fas fa-rocket"></i> LAUNCH SYSTEM</button>
+                        <button id="btn-check" class="cyber-btn btn-outline"><i class="fas fa-heartbeat"></i> DIAGNOSTIC CHECK</button>
+                    </div>
+
+                    <div class="activity-log-box">
+                        <h4><i class="fas fa-terminal"></i> SECURITY MONITOR LOG</h4>
+                        <div id="terminal-logs" class="terminal-body">
+                            <div class="log-line text-muted">[SYSTEM] Core structural interface ready.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Main Chat Hub Area -->
+                <div class="chat-main-terminal">
+                    <div class="panel-header compact">
+                        <i class="fas fa-brain"></i> <h3>CENTRAL INTELLIGENCE ENGINE</h3>
+                    </div>
+                    
+                    <div id="main-chat-output" class="chat-output-area">
+                        <div class="system-message">
+                            <i class="fas fa-microchip"></i> Welcome to the Secure Anis AI Environment. System standing by.
+                        </div>
+                    </div>
+                    
+                    <form id="main-chat-form" class="chat-input-container">
+                        <input type="text" id="main-chat-input" placeholder="Query system database or submit operational request..." autocomplete="off" required>
+                        <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- FLOATING ANIS AI CLIENT WIDGET -->
+    <div id="floating-widget" class="floating-container">
+        <!-- Collapsed Trigger Button -->
+        <button id="widget-trigger" class="widget-fab">
+            <i class="fas fa-comment-slash" id="widget-icon-closed"></i>
+            <span class="widget-name-badge">Anis AI</span>
+        </button>
+
+        <!-- Expanded Interface -->
+        <div id="widget-panel" class="widget-window glass-panel hidden">
+            <div class="widget-header">
+                <div class="avatar-info">
+                    <div class="online-avatar"><i class="fas fa-user-ninja"></i></div>
+                    <div>
+                        <h4>Anis AI</h4>
+                        <span class="subtext">Tactical Security Layer</span>
+                    </div>
+                </div>
+                <button id="widget-close-btn" class="close-btn"><i class="fas fa-xmark"></i></button>
+            </div>
+            
+            <div id="widget-chat-output" class="widget-body">
+                <div class="ai-msg">Greetings operator. This secure node isolates system queries safely. How can I assist?</div>
+            </div>
+
+            <form id="widget-chat-form" class="widget-footer">
+                <input type="text" id="widget-input" placeholder="Ask Anis AI..." autocomplete="off" required>
+                <button type="submit" class="widget-send-btn"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
 
 </body>
 </html>
