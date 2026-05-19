@@ -5,7 +5,7 @@ from fastapi import FastAPI, Depends, HTTPException, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Security and Rate Limiting Imports
+# Security and Rate Limiting
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -28,19 +28,17 @@ app = FastAPI(title="ANIS-AI-SHIELD Core", version="3.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS Configuration
+# CORS Configuration - Ensure your Vercel URL is included here
 ALLOWED_ORIGINS = [
-    "https://protected-ethical-anis-ai-12.onrender.com",
-    "http://127.0.0.1:5500",
-    "http://localhost:3000"
+    "*", # For testing; restrict to your actual Vercel URL in production
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # AI Client Initialization
@@ -82,11 +80,11 @@ async def secure_login(
     user_record = get_user_profile(username)
     if not user_record:
         log_login_event(username, "USER_NOT_FOUND", ip)
-        raise HTTPException(status_code=401, detail="Invalid access credential mappings.")
+        raise HTTPException(status_code=401, detail="Invalid access credentials.")
 
     if not verify_password(password, user_record.get("hashed_password")):
         log_login_event(username, "INVALID_PASSWORD", ip)
-        raise HTTPException(status_code=401, detail="Invalid access credential mappings.")
+        raise HTTPException(status_code=401, detail="Invalid access credentials.")
 
     log_login_event(username, "STAGE_1_CLEARED", ip, "AI Assessment Passed")
     
@@ -105,7 +103,7 @@ async def secure_login(
 def verify_biometric_hardware(request: Request, payload: BiometricVerifyPayload):
     ip = get_remote_address(request)
     if payload.userEmail not in PENDING_BIOMETRIC_CHALLENGES:
-        raise HTTPException(status_code=400, detail="Challenge handshake context timed out.")
+        raise HTTPException(status_code=400, detail="Handshake context timed out.")
     
     del PENDING_BIOMETRIC_CHALLENGES[payload.userEmail]
     
@@ -117,7 +115,7 @@ def verify_biometric_hardware(request: Request, payload: BiometricVerifyPayload)
 @limiter.limit("30/minute")
 def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depends(get_current_user)):
     if not ai_client:
-        raise HTTPException(status_code=503, detail="AI Core processing interface completely offline.")
+        raise HTTPException(status_code=503, detail="AI Core processing interface offline.")
     
     try:
         contents = []
@@ -131,7 +129,7 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
             model='gemini-2.5-flash',
             contents=contents,
             config=types.GenerateContentConfig(
-                system_instruction="You are ANIS-AI-SHIELD, an advanced AI system terminal tuned for secure systems administration and ethical hacking optimization.",
+                system_instruction="You are ANIS-AI-SHIELD, a tactical security AI.",
                 temperature=0.3
             )
         )
@@ -139,4 +137,4 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
         return {"response": response.text}
     except Exception as e:
         logger.error(f"Chat processing error: {e}")
-        raise HTTPException(status_code=500, detail="Internal processing error computing data streams.")
+        raise HTTPException(status_code=500, detail="Internal processing error.")
