@@ -1,113 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANIS AI SYSTEM | Gatekeeper Terminal</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ANIS AI SYSTEM</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:#05070d;
+    color:white;
+    overflow:hidden;
+}
+
+/* BACKGROUND */
+
+body::before{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:
+    radial-gradient(circle at top left,#00f0ff22,transparent 35%),
+    radial-gradient(circle at bottom right,#ff00ff22,transparent 35%);
+    z-index:-1;
+}
+
+/* MAIN CONTAINER */
+
+.main-container{
+    width:100%;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+/* LOGIN BOX */
+
+.login-box{
+    width:100%;
+    max-width:520px;
+    background:rgba(10,15,25,0.85);
+    border:1px solid rgba(0,255,255,0.2);
+    backdrop-filter:blur(12px);
+    border-radius:22px;
+    padding:40px;
+    box-shadow:
+    0 0 40px rgba(0,255,255,0.2),
+    0 0 80px rgba(255,0,255,0.12);
+    position:relative;
+}
+
+/* TITLE */
+
+.logo{
+    text-align:center;
+    margin-bottom:35px;
+}
+
+.logo h1{
+    font-size:3rem;
+    font-weight:900;
+    color:#00f0ff;
+    letter-spacing:3px;
+    text-shadow:
+    0 0 10px #00f0ff,
+    0 0 30px #00f0ff;
+}
+
+.logo p{
+    margin-top:10px;
+    color:#c9d4ff;
+    font-size:15px;
+    font-weight:bold;
+}
+
+/* LABELS */
+
+.label{
+    display:block;
+    margin-bottom:10px;
+    margin-top:18px;
+    font-size:15px;
+    font-weight:900;
+    color:#ffffff;
+    letter-spacing:1px;
+}
+
+/* INPUTS */
+
+.input-box{
+    width:100%;
+    padding:16px;
+    border:none;
+    outline:none;
+    border-radius:12px;
+    background:#101826;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    border:2px solid rgba(0,255,255,0.2);
+    transition:0.3s;
+}
+
+.input-box:focus{
+    border:2px solid #00f0ff;
+    box-shadow:0 0 20px rgba(0,255,255,0.4);
+}
+
+/* LOGIN INFO */
+
+.info-box{
+    margin-top:18px;
+    padding:14px;
+    background:#0f1624;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.08);
+}
+
+.info-box p{
+    margin:8px 0;
+    color:#dbe4ff;
+    font-size:14px;
+    font-weight:bold;
+}
+
+/* CAPTCHA */
+
+.captcha-box{
+    margin-top:22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.captcha-box input{
+    width:20px;
+    height:20px;
+}
+
+.captcha-box label{
+    font-weight:900;
+    color:#00f0ff;
+}
+
+/* BUTTON */
+
+.login-btn{
+    width:100%;
+    margin-top:28px;
+    padding:16px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(90deg,#00f0ff,#ff00ff);
+    color:black;
+    font-size:18px;
+    font-weight:900;
+    cursor:pointer;
+    transition:0.3s;
+    box-shadow:0 0 25px rgba(0,255,255,0.3);
+}
+
+.login-btn:hover{
+    transform:translateY(-3px);
+    box-shadow:
+    0 0 20px #00f0ff,
+    0 0 40px #ff00ff;
+}
+
+/* SECURITY TEXT */
+
+.security{
+    margin-top:22px;
+    text-align:center;
+    color:#8ea1d1;
+    font-size:13px;
+    font-weight:bold;
+}
+
+/* AI STATUS */
+
+.status{
+    margin-top:25px;
+    text-align:center;
+    color:#00ff9d;
+    font-weight:900;
+    font-size:14px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:600px){
+
+.logo h1{
+    font-size:2.2rem;
+}
+
+.login-box{
+    padding:28px;
+}
+
+}
+
+</style>
 </head>
+
 <body>
 
-    <div class="scanlines"></div>
+<div class="main-container">
 
-    <div class="viewport-container">
-        
-        <header>
-            <div class="logo-container">
-                <h1 class="neon-text">ANIS AI SYSTEM</h1>
-            </div>
-        </header>
+<div class="login-box">
 
-        <main class="main-content">
-            <section id="auth-screen" class="glass-panel">
-                <div class="panel-header">
-                    <i class="fas fa-shield-halved security-glow"></i>
-                    <h2>SECURE IDENTITY DECRYPTION</h2>
-                </div>
-                
-                <div class="auth-instructions">
-                    <p><strong>[SECURITY OPERATOR CLEARANCE REQUIRED]:</strong></p>
-                    <ul class="instruction-list">
-                        <li><strong>Identity Key:</strong> Input your unique Render Identifier.</li>
-                        <li><strong>Passphrase:</strong> Input your cryptographic access key.</li>
-                        <li><strong>Signature:</strong> The ethical operator toggle must be active.</li>
-                    </ul>
-                </div>
+<div class="logo">
+<h1>ANIS AI SYSTEM</h1>
+<p>ULTRA SECURE AI TERMINAL</p>
+</div>
 
-                <form id="login-form">
-                    <div class="input-group">
-                        <label for="email">
-                            <strong><i class="fas fa-link"></i> OPERATOR RENDER URL [Type: https://protected-ethical-anis-ai-12.onrender.com]</strong>
-                        </label>
-                        <input type="text" id="email" required placeholder="https://protected-ethical-anis-ai-12.onrender.com" autocomplete="off">
-                    </div>
+<form id="loginForm">
 
-                    <div class="input-group">
-                        <label for="password">
-                            <strong><i class="fas fa-key"></i> SYSTEM PASSPHRASE [Type: AN1IS2H3]</strong>
-                        </label>
-                        <input type="password" id="password" required placeholder="••••••••••••">
-                    </div>
+<label class="label">
+RENDER URL
+(BRACKET: ENTER YOUR RENDER WEBSITE URL)
+</label>
 
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="captcha_verified" required>
-                        <label for="captcha_verified"><strong>Confirm Ethical Operator Signature Framework</strong></label>
-                    </div>
+<input
+type="text"
+id="renderUrl"
+class="input-box"
+placeholder="https://protected-ethical-anis-ai-12.onrender.com"
+required
+>
 
-                    <button type="submit" class="btn-verify" id="login-submit-btn">
-                        <i class="fas fa-unlock-alt"></i> INITIALIZE DECRYPTION
-                    </button>
-                </form>
-            </section>
+<label class="label">
+RENDER PASSWORD
+(BRACKET: ENTER YOUR SECURE PASSWORD)
+</label>
 
-            <section id="dashboard-screen" class="glass-panel hidden">
-                <div class="dashboard-header">
-                    <div class="panel-header">
-                        <i class="fas fa-terminal security-glow"></i>
-                        <h2>NEURAL THREAT PROFILER COMMAND</h2>
-                    </div>
-                    <div class="diagnostics-bar">
-                        <button id="check-health-btn" class="btn-diag"><i class="fas fa-heartbeat"></i> CHECK SYSTEM</button>
-                        <div id="health-status-display" class="status-indicator">Status: Unknown</div>
-                    </div>
-                </div>
+<input
+type="password"
+id="password"
+class="input-box"
+placeholder="Enter Secure Password"
+required
+>
 
-                <div class="chat-wrapper">
-                    <div id="chat-terminal" class="chat-log">
-                        <div class="system-msg">[SYSTEM] Terminal linked. Neural core awaiting initialization query...</div>
-                    </div>
-                    
-                    <form id="chat-form" class="chat-input-area">
-                        <input type="text" id="chat-input" placeholder="Execute analytical query..." required autocomplete="off">
-                        <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            </section>
-        </main>
-    </div>
+<div class="info-box">
 
-    <div id="anis-widget-container">
-        <div id="anis-widget-window" class="widget-chat hidden">
-            <div class="widget-header">
-                <span><i class="fas fa-brain"></i> Anis AI Mini-Core</span>
-                <button id="close-widget-btn">&times;</button>
-            </div>
-            <div id="widget-chat-log" class="widget-log">
-                <div class="system-msg">Mini-core online. Ask me anything.</div>
-            </div>
-            <form id="widget-chat-form" class="widget-input-form">
-                <input type="text" id="widget-input" placeholder="Quick query..." required autocomplete="off">
-                <button type="submit"><i class="fas fa-chevron-right"></i></button>
-            </form>
-        </div>
-        
-        <div id="anis-widget-button" title="Summon Anis AI Assistant">
-            <i class="fas fa-brain"></i>
-            <span class="widget-label">Anis AI</span>
-        </div>
-    </div>
+<p>
+<i class="fa-solid fa-shield-halved"></i>
+Only authorized Render users can access this AI.
+</p>
 
-    <script src="script.js"></script>
+<p>
+<i class="fa-solid fa-lock"></i>
+Protected with AI Human Verification.
+</p>
+
+<p>
+<i class="fa-solid fa-terminal"></i>
+Direct access to ANIS AI Dashboard after login.
+</p>
+
+</div>
+
+<div class="captcha-box">
+<input type="checkbox" id="humanCheck" required>
+<label for="humanCheck">
+I AM HUMAN — VERIFY IDENTITY
+</label>
+</div>
+
+<button type="submit" class="login-btn">
+<i class="fa-solid fa-right-to-bracket"></i>
+LAUNCH ANIS AI
+</button>
+
+</form>
+
+<div class="security">
+MILITARY GRADE AI SECURITY ENABLED
+</div>
+
+<div class="status">
+● AI CORE STATUS : ONLINE
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const form = document.getElementById("loginForm");
+
+form.addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const renderUrl = document.getElementById("renderUrl").value.trim();
+const password = document.getElementById("password").value.trim();
+const humanCheck = document.getElementById("humanCheck").checked;
+
+if(!humanCheck){
+    alert("Please verify that you are human.");
+    return;
+}
+
+if(renderUrl.length < 10){
+    alert("Please enter valid Render URL.");
+    return;
+}
+
+if(password.length < 4){
+    alert("Password too short.");
+    return;
+}
+
+try{
+
+const btn = document.querySelector(".login-btn");
+
+btn.innerHTML = "VERIFYING ACCESS...";
+btn.disabled = true;
+
+setTimeout(()=>{
+
+localStorage.setItem("anis_ai_logged","true");
+
+window.location.href = "dashboard.html";
+
+},2000);
+
+}catch(error){
+
+alert("Login failed.");
+
+}
+
+});
+
+</script>
+
 </body>
 </html>
