@@ -3,51 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANIS-AI-SHIELD | Access Gateway</title>
+    <title>ANIS AI SYSTEM | Gatekeeper Terminal</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-    <div class="container">
+    <div class="scanlines"></div>
+
+    <div class="viewport-container">
+        
         <header>
-            <h1 class="logo">ANIS-AI-SHIELD</h1>
+            <div class="logo-container">
+                <h1 class="neon-text">ANIS AI SYSTEM</h1>
+            </div>
         </header>
 
-        <section id="auth-screen" class="glass-panel">
-            <div class="panel-header">
-                <i class="fas fa-terminal security-glow"></i>
-                <h2>SECURE SYSTEM PROFILER</h2>
+        <main class="main-content">
+            <section id="auth-screen" class="glass-panel">
+                <div class="panel-header">
+                    <i class="fas fa-shield-halved security-glow"></i>
+                    <h2>SECURE IDENTITY DECRYPTION</h2>
+                </div>
+                
+                <div class="auth-instructions">
+                    <p><strong>SECURITY OPERATOR CLEARANCE REQUIRED:</strong></p>
+                    <ul class="instruction-list">
+                        <li><strong>Identity:</strong> Input your verified system email.</li>
+                        <li><strong>Passphrase:</strong> Input your cryptographic security token.</li>
+                        <li><strong>Signature:</strong> Attest to the ethical matrix toggle below.</li>
+                    </ul>
+                </div>
+
+                <form id="login-form">
+                    <div class="input-group">
+                        <label for="email"><i class="fas fa-user-shield"></i> Operator Email</label>
+                        <input type="email" id="email" required placeholder="identity@anisai.network" autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password"><i class="fas fa-key"></i> Access Phrase</label>
+                        <input type="password" id="password" required placeholder="••••••••••••">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="captcha_verified" required>
+                        <label for="captcha_verified">Confirm Ethical Operator Signature</label>
+                    </div>
+
+                    <button type="submit" class="btn-verify" id="login-submit-btn">
+                        <i class="fas fa-unlock-alt"></i> INITIALIZE DECRYPTION
+                    </button>
+                </form>
+            </section>
+
+            <section id="dashboard-screen" class="glass-panel hidden">
+                <div class="dashboard-header">
+                    <div class="panel-header">
+                        <i class="fas fa-terminal security-glow"></i>
+                        <h2>NEURAL THREAT PROFILER COMMAND</h2>
+                    </div>
+                    <div class="diagnostics-bar">
+                        <button id="check-health-btn" class="btn-diag"><i class="fas fa-heartbeat"></i> CHECK SYSTEM</button>
+                        <div id="health-status-display" class="status-indicator">Status: Unknown</div>
+                    </div>
+                </div>
+
+                <div class="chat-wrapper">
+                    <div id="chat-terminal" class="chat-log">
+                        <div class="system-msg">[SYSTEM] Terminal linked. Neural core awaiting initialization query...</div>
+                    </div>
+                    
+                    <form id="chat-form" class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Execute analytical query..." required autocomplete="off">
+                        <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="anis-widget-container">
+        <div id="anis-widget-window" class="widget-chat hidden">
+            <div class="widget-header">
+                <span><i class="fas fa-brain"></i> Anis AI Mini-Core</span>
+                <button id="close-widget-btn">&times;</button>
             </div>
-            
-            <div class="auth-instructions" style="font-size: 0.85rem; color: #888; margin-bottom: 20px; border-left: 2px solid #00f2ff; padding-left: 10px;">
-                <p><strong>REQUIRED FOR SYSTEM ENTRY:</strong></p>
-                <ul style="margin: 5px 0; padding-left: 15px;">
-                    <li><strong>Registered Identity:</strong> Enter your verified operator email address.</li>
-                    <li><strong>Access Phrase:</strong> Enter your unique secure passphrase.</li>
-                    <li><strong>Ethical Signature:</strong> You must toggle the ethical confirmation box to initialize the Neural Threat Profiler.</li>
-                </ul>
+            <div id="widget-chat-log" class="widget-log">
+                <div class="system-msg">Mini-core online. Ask me anything.</div>
             </div>
-
-            <form id="login-form">
-                <div class="input-group">
-                    <label for="email"><i class="fas fa-id-badge"></i> Operator Email</label>
-                    <input type="email" id="email" required placeholder="operator@anisai.local">
-                </div>
-
-                <div class="input-group">
-                    <label for="password"><i class="fas fa-lock"></i> Access Phrase</label>
-                    <input type="password" id="password" required placeholder="••••••••">
-                </div>
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="captcha_verified" required>
-                    <label for="captcha_verified">Confirm Ethical Operator Signature</label>
-                </div>
-
-                <button type="submit" class="btn-verify">PROBE AND VERIFY IDENTITY</button>
+            <form id="widget-chat-form" class="widget-input-form">
+                <input type="text" id="widget-input" placeholder="Quick query..." required autocomplete="off">
+                <button type="submit"><i class="fas fa-chevron-right"></i></button>
             </form>
-        </section>
+        </div>
+        
+        <div id="anis-widget-button" title="Summon Anis AI Assistant">
+            <i class="fas fa-brain"></i>
+            <span class="widget-label">Anis AI</span>
+        </div>
     </div>
 
     <script src="script.js"></script>
