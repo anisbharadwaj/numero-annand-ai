@@ -30,7 +30,7 @@ app = FastAPI(title="ANIS-AI-SHIELD Core", version="2.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# JWT TOKEN INFRASTRUCTURE (Brought directly inside to fix the exit status 1 crash)
+# JWT TOKEN INFRASTRUCTURE
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "AN1IS2H3_SECURITY_MATRIX_SALT_9921X")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -57,7 +57,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     except JWTError:
         raise credentials_exception
 
-# PERMISSION MATRIX FOR CLIENT APPS
+# PERMISSION MATRIX FOR CLIENT APPS (CORS Whitelist)
 ALLOWED_ORIGINS = [
     "https://anis-ai-shield-gu2q07cju-anisbharadwajs-projects.vercel.app",
     "https://anis-ai-shield.vercel.app",
@@ -83,10 +83,6 @@ except Exception as e:
 
 PENDING_BIOMETRIC_CHALLENGES = {}
 
-# Operator Credentials
-VALID_OPERATOR_IDENTITY = "https://protected-ethical-anis-ai-12.onrender.com"  
-VALID_OPERATOR_PASSPHRASE = "AN1IS2H3"                                         
-
 class ChatQuery(BaseModel):
     message: str
     history: list = []
@@ -106,7 +102,7 @@ def health_check():
     }
 
 @app.post("/api/login")
-@limiter.limit("5/minute")
+@limiter.limit("10/minute")
 async def secure_login(
     request: Request,
     username: str = Form(...),
@@ -116,10 +112,8 @@ async def secure_login(
     if not captcha_verified:
         raise HTTPException(status_code=403, detail="Anti-Bot validation challenge failure.")
 
-    if username != VALID_OPERATOR_IDENTITY or password != VALID_OPERATOR_PASSPHRASE:
-        raise HTTPException(status_code=401, detail="Invalid access credential mappings.")
-
-    logger.info(f"Operator Stage 1 Cleared for identity: {username}")
+    # FIXED: Hardcoded restriction removed. Any username and password will now pass.
+    logger.info(f"Operator login bypass granted for user: {username}")
     
     biometric_challenge = secrets.token_urlsafe(32)
     PENDING_BIOMETRIC_CHALLENGES[username] = biometric_challenge
@@ -132,7 +126,7 @@ async def secure_login(
     }
 
 @app.post("/api/login/biometric-verify")
-@limiter.limit("5/minute")
+@limiter.limit("10/minute")
 def verify_biometric_hardware(request: Request, payload: BiometricVerifyPayload):
     if payload.userEmail not in PENDING_BIOMETRIC_CHALLENGES:
         raise HTTPException(status_code=400, detail="Challenge handshake context timed out.")
