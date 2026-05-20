@@ -1,72 +1,226 @@
-/* Full-page Dark Neon Hacker Theme */
+/* ==========================================================================
+   ANIS-AI-SHIELD CORE STYLING TERMINAL
+   ========================================================================== */
+
 :root {
     --neon-cyan: #00f3ff;
     --neon-purple: #bc13fe;
-    --bg-dark: #050505;
-    --panel-bg: rgba(10, 10, 15, 0.85);
+    --dark-void: #050508;
+    --panel-bg: rgba(10, 10, 18, 0.85);
+    --border-glow: rgba(0, 243, 255, 0.25);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body, html {
-    margin: 0;
-    padding: 0;
     height: 100vh;
     width: 100vw;
-    background-color: var(--bg-dark);
-    color: var(--neon-cyan);
+    background-color: var(--dark-void);
+    color: #ffffff;
     font-family: 'Courier New', Courier, monospace;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
-/* Fix: Remove restrictive max-widths to allow full-page scaling */
-.container {
-    width: 90vw;
-    height: 90vh;
+/* Background Animated Canvas Scanlines */
+body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
+/* Complete Full Page App Viewport Wrapper */
+.viewport-container {
+    width: 100vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 20px;
+    z-index: 5;
 }
 
-.title-glow {
-    font-size: 3.5rem;
-    font-weight: bold;
-    text-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-purple);
-    margin-bottom: 2rem;
+header {
+    margin-bottom: 30px;
     text-align: center;
 }
 
+.logo-container h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-purple);
+}
+
+/* Glassmorphism Auth System Profiler Panel Centered */
 .glass-panel {
     background: var(--panel-bg);
     border: 1px solid var(--neon-cyan);
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-    border-radius: 10px;
+    box-shadow: 0 0 25px var(--border-glow);
+    border-radius: 12px;
     padding: 40px;
     width: 100%;
-    max-width: 500px; /* Constrain only the login form, not the app */
-    backdrop-filter: blur(10px);
+    max-width: 650px; /* Expands form layout comfortably */
+    backdrop-filter: blur(12px);
+    transition: all 0.4s ease;
 }
 
-/* Floating AI Widget */
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+    padding-bottom: 15px;
+}
+
+.panel-header h2 {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: var(--neon-cyan);
+}
+
+.security-glow {
+    color: var(--neon-cyan);
+    animation: pulse 2s infinite;
+}
+
+/* Input Configurations */
+.input-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.input-group input {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+    padding: 12px 15px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    border-radius: 6px;
+    outline: none;
+    transition: border 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 8px rgba(0, 243, 255, 0.3);
+}
+
+/* Interactive Signature Checkbox */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    accent-color: var(--neon-cyan);
+    width: 18px;
+    height: 18px;
+}
+
+.checkbox-group label {
+    font-size: 0.9rem;
+    color: #bbb;
+    user-select: none;
+}
+
+/* Operational Button Layout */
+.btn-verify {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--neon-purple);
+    color: #fff;
+    padding: 15px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-verify:hover {
+    background: var(--neon-purple);
+    box-shadow: 0 0 20px var(--neon-purple);
+    transform: translateY(-2px);
+}
+
+.btn-verify:disabled {
+    border-color: #444;
+    color: #666;
+    background: rgba(0,0,0,0.4);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Floating AI Assistant Core Widget */
 #anis-widget {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background: var(--neon-purple);
+    bottom: 30px;
+    right: 30px;
+    width: 65px;
+    height: 65px;
+    background: var(--dark-void);
+    border: 2px solid var(--neon-purple);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 15px var(--neon-purple);
+    box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.3s ease;
     z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#anis-widget i {
+    color: var(--neon-purple);
+    font-size: 1.5rem;
 }
 
 #anis-widget:hover {
-    transform: scale(1.1);
+    transform: scale(1.1) rotate(15deg);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 20px var(--neon-cyan);
+}
+
+#anis-widget:hover i {
+    color: var(--neon-cyan);
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; text-shadow: 0 0 10px var(--neon-cyan); }
+    100% { opacity: 0.6; }
 }
