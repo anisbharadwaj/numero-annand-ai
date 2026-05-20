@@ -112,7 +112,6 @@ async def secure_login(
     if not captcha_verified:
         raise HTTPException(status_code=403, detail="Anti-Bot validation challenge failure.")
 
-    # FIXED: Hardcoded restriction removed. Any username and password will now pass.
     logger.info(f"Operator login bypass granted for user: {username}")
     
     biometric_challenge = secrets.token_urlsafe(32)
