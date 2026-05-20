@@ -1,7 +1,5 @@
-// CONFIGURATION: Set your exact Render backend root directory here
 const API_BASE_URL = "https://protected-ethical-anis-ai-12.onrender.com";
 
-// Authentication System State Elements
 let authToken = null;
 let chatHistory = [];
 let widgetHistory = [];
@@ -11,21 +9,18 @@ const dashboardScreen = document.getElementById("dashboard-screen");
 const loginForm = document.getElementById("login-form");
 const loginBtn = document.getElementById("login-submit-btn");
 
-// --- 1. HANDLING THE SECURE ENTRY LOGIN GATEWAY ---
 loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     
-    const email = document.getElementById("email").value.trim();
+    const renderUrlInput = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
     const captchaChecked = document.getElementById("captcha_verified").checked;
 
-    // Visual feedback execution update
     loginBtn.disabled = true;
     loginBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> RUNNING DECRYPTION CHECK...`;
 
-    // Package as standard urlencoded fields to match Python backend validation definitions
     const formData = new FormData();
-    formData.append("username", email);
+    formData.append("username", renderUrlInput);
     formData.append("password", password);
     formData.append("captcha_verified", captchaChecked ? "true" : "false");
 
@@ -42,9 +37,6 @@ loginForm.addEventListener("submit", async (e) => {
         }
 
         if (data.requires_biometrics) {
-            console.log("Stage 1 Pass. Challenge: ", data.biometric_challenge);
-            
-            // Execute automated backdrop challenge handshake confirmation instantly to clear gateway
             const bioData = {
                 signature: data.biometric_challenge,
                 userEmail: data.user_identity
@@ -65,7 +57,6 @@ loginForm.addEventListener("submit", async (e) => {
             authToken = bioResult.access_token;
             sessionStorage.setItem("anis_token", authToken);
             
-            // Trigger instant structural transition to direct AI dashboard access
             showNotification("Terminal Access Key Authorized.", "cyan");
             launchDashboard();
         }
@@ -81,10 +72,9 @@ loginForm.addEventListener("submit", async (e) => {
 function launchDashboard() {
     authScreen.classList.add("hidden");
     dashboardScreen.classList.remove("hidden");
-    executeHealthCheck(); // Auto run diagnostics when dashboard opens
+    executeHealthCheck();
 }
 
-// --- 2. INTEGRATING INTELLIGENT AI SYSTEM ASSISTANT ---
 const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
 const chatTerminal = document.getElementById("chat-terminal");
@@ -94,7 +84,6 @@ chatForm.addEventListener("submit", async (e) => {
     const queryText = chatInput.value.trim();
     if (!queryText) return;
 
-    // Append operator query to display viewport array
     appendMessage(chatTerminal, "Operator", queryText);
     chatInput.value = "";
 
@@ -105,22 +94,13 @@ chatForm.addEventListener("submit", async (e) => {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${authToken}`
             },
-            body: JSON.stringify({
-                message: queryText,
-                history: chatHistory
-            })
+            body: JSON.stringify({ message: queryText, history: chatHistory })
         });
 
         const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Neural mapping processing disconnect.");
 
-        if (!response.ok) {
-            throw new Error(data.detail || "Neural mapping processing disconnect.");
-        }
-
-        // Render response data down to text layout interface
         appendMessage(chatTerminal, "Anis-AI", data.response);
-        
-        // Push interactions into session context logs array to avoid repeating questions
         chatHistory.push({ role: "user", text: queryText });
         chatHistory.push({ role: "model", text: data.response });
 
@@ -129,18 +109,15 @@ chatForm.addEventListener("submit", async (e) => {
     }
 });
 
-// --- 3. SYSTEM HEALTH DIAGNOSTICS CONTROL ---
 const checkHealthBtn = document.getElementById("check-health-btn");
 const healthDisplay = document.getElementById("health-status-display");
 
 async function executeHealthCheck() {
     healthDisplay.textContent = "Querying core status...";
     healthDisplay.className = "status-indicator processing";
-    
     try {
         const res = await fetch(`${API_BASE_URL}/health`);
         const stats = await res.json();
-        
         if (res.ok && stats.status === "ok") {
             healthDisplay.textContent = `SYS: OPERATIONAL | Uptime: ${stats.uptime}s | AI: ${stats.ai_connected ? 'LINKED' : 'ERR'}`;
             healthDisplay.className = "status-indicator online";
@@ -155,7 +132,6 @@ async function executeHealthCheck() {
 }
 checkHealthBtn.addEventListener("click", executeHealthCheck);
 
-// --- 4. FLOATING ASSISTANT WIDGET HANDLING ---
 const widgetBtn = document.getElementById("anis-widget-button");
 const widgetWindow = document.getElementById("anis-widget-window");
 const closeWidgetBtn = document.getElementById("close-widget-btn");
@@ -184,7 +160,6 @@ widgetForm.addEventListener("submit", async (e) => {
             body: JSON.stringify({ message: txt, history: widgetHistory })
         });
         const data = await response.json();
-        
         if(!response.ok) throw new Error(data.detail || "Authentication Required for AI access.");
         
         appendMessage(widgetLog, "Anis-AI", data.response);
@@ -195,13 +170,12 @@ widgetForm.addEventListener("submit", async (e) => {
     }
 });
 
-// --- HELPER UTILITY LOGIC COMPONENTS ---
 function appendMessage(targetLog, sender, text) {
     const msg = document.createElement("div");
     msg.className = `chat-bubble ${sender.toLowerCase()}`;
     msg.innerHTML = `<strong>[${sender}]:</strong> <span>${text}</span>`;
     targetLog.appendChild(msg);
-    targetLog.scrollTop = targetLog.scrollHeight; // Auto scrolls text
+    targetLog.scrollTop = targetLog.scrollHeight;
 }
 
 function showNotification(text, toneColor) {
