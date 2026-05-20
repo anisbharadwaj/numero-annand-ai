@@ -30,7 +30,6 @@ loginForm.addEventListener("submit", async (e) => {
     formData.append("captcha_verified", captchaChecked ? "true" : "false");
 
     try {
-        // FIXED URL CONCATENATION: No stray padding spaces allowed here
         const response = await fetch(`${API_BASE_URL}/api/login`, {
             method: "POST",
             body: formData
@@ -42,7 +41,6 @@ loginForm.addEventListener("submit", async (e) => {
             throw new Error(data.detail || "Access mapping verification failure.");
         }
 
-        // Simulating the stage-2 bypass to launch cleanly into 'Ask AI' dashboard as requested
         if (data.requires_biometrics) {
             console.log("Stage 1 Pass. Challenge: ", data.biometric_challenge);
             
@@ -177,7 +175,6 @@ widgetForm.addEventListener("submit", async (e) => {
     widgetInput.value = "";
 
     try {
-        // Widgets hit the open health path or open assistant context logic directly
         const response = await fetch(`${API_BASE_URL}/api/chat`, {
             method: "POST",
             headers: {
