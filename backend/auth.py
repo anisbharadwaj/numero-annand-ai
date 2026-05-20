@@ -1,51 +1,54 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
-import jwt
+from jose import JWTError, jwt
 
-JWT_SECRET = os.getenv("JWT_SECRET", "anis-ai-zero-trust-2026-core-secret-key-xyz")
+# CRYPTOGRAPHIC CORE CONFIGURATION VARIABLES
+# Uses your system passphrase to sign and validate stateless operator session tokens
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "AN1IS2H3_SECURITY_MATRIX_SALT_9921X")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 120
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Enforces standard OAuth2 security protocols for token extraction
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 
-def hash_password(password: str) -> str:
-    """Utility to safely salt and hash credentials during profile onboarding."""
-    return pwd_context.hash(password)
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verifies user login attempt against the protected cryptographic signature."""
-    try:
-        return pwd_context.verify(plain_password, hashed_password)
-    except Exception:
-        return False
-
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Issues temporary administrative validation JWT certificates."""
+    """
+    Generates a secure, cryptographically signed JWT access token for session tracking.
+    """
     to_encode = data.copy()
+    
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, JWT_SECRET, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
-    """Intercepts and audits authorization metadata context across active sessions."""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Session signature expired or missing.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+def verify_access_token(token: str, credentials_exception: HTTPException) -> str:
+    """
+    Parses and decodes the incoming session token to ensure it hasn't expired or been tampered with.
+    """
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
         return username
-    except jwt.PyJWTError:
+    except JWTError:
         raise credentials_exception
+
+def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
+    """
+    Dependency injection framework to protect backend routes from unauthenticated actors.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate operator session tokens. Re-authorization required.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    return verify_access_token(token, credentials_exception)
