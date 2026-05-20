@@ -1,13 +1,13 @@
 /* ==========================================================================
-   ANIS-AI-SHIELD CORE STYLING TERMINAL
+   ANIS CORE UI RENDER SYSTEM DESIGN
    ========================================================================== */
 
 :root {
-    --neon-cyan: #00f3ff;
-    --neon-purple: #bc13fe;
-    --dark-void: #050508;
-    --panel-bg: rgba(10, 10, 18, 0.85);
-    --border-glow: rgba(0, 243, 255, 0.25);
+    --cyan-glow: #00f3ff;
+    --purple-glow: #bc13fe;
+    --terminal-void: #020204;
+    --glass-hull: rgba(8, 8, 14, 0.9);
+    --alert-crimson: #ff0055;
 }
 
 * {
@@ -19,7 +19,7 @@
 body, html {
     height: 100vh;
     width: 100vw;
-    background-color: var(--dark-void);
+    background-color: var(--terminal-void);
     color: #ffffff;
     font-family: 'Courier New', Courier, monospace;
     display: flex;
@@ -28,62 +28,77 @@ body, html {
     overflow: hidden;
 }
 
-/* Background Animated Canvas Scanlines */
-body::before {
-    content: " ";
-    display: block;
+/* Background CRT Scanlines Effect Overlay */
+.scanlines {
     position: fixed;
-    top: 0; left: 0; bottom: 0; right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    z-index: 2;
-    background-size: 100% 2px, 3px 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+    z-index: 10;
+    background-size: 100% 3px, 6px 100%;
     pointer-events: none;
 }
 
-/* Complete Full Page App Viewport Wrapper */
 .viewport-container {
     width: 100vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+    padding: 30px;
     z-index: 5;
 }
 
 header {
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-.logo-container h1 {
-    font-size: 3.5rem;
-    font-weight: 900;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #fff;
-    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-purple);
-}
-
-/* Glassmorphism Auth System Profiler Panel Centered */
-.glass-panel {
-    background: var(--panel-bg);
-    border: 1px solid var(--neon-cyan);
-    box-shadow: 0 0 25px var(--border-glow);
-    border-radius: 12px;
-    padding: 40px;
     width: 100%;
-    max-width: 650px; /* Expands form layout comfortably */
-    backdrop-filter: blur(12px);
-    transition: all 0.4s ease;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.neon-text {
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: 8px;
+    color: #ffffff;
+    text-shadow: 0 0 10px var(--cyan-glow), 0 0 25px var(--purple-glow);
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* Base Glassmorphism Framework Specs */
+.glass-panel {
+    background: var(--glass-hull);
+    border: 1px solid var(--cyan-glow);
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.15);
+    border-radius: 8px;
+    padding: 40px;
+    transition: all 0.5s ease;
+}
+
+/* Full Width and Height Constraints for Dashboard Interface */
+#auth-screen {
+    width: 100%;
+    max-width: 550px;
+}
+
+#dashboard-screen {
+    width: 100%;
+    max-width: 1200px;
+    height: 75vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .panel-header {
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     border-bottom: 1px solid rgba(0, 243, 255, 0.2);
     padding-bottom: 15px;
 }
@@ -91,15 +106,30 @@ header {
 .panel-header h2 {
     font-size: 1.2rem;
     letter-spacing: 2px;
-    color: var(--neon-cyan);
+    color: var(--cyan-glow);
 }
 
 .security-glow {
-    color: var(--neon-cyan);
-    animation: pulse 2s infinite;
+    color: var(--cyan-glow);
+    animation: beacon 2.5s infinite;
 }
 
-/* Input Configurations */
+/* Informational Field Layout */
+.auth-instructions {
+    background: rgba(0,0,0,0.4);
+    border-left: 3px solid var(--cyan-glow);
+    padding: 15px;
+    margin-bottom: 25px;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.instruction-list {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+/* Setup Inputs and Interactions Forms */
 .input-group {
     margin-bottom: 20px;
     display: flex;
@@ -107,120 +137,212 @@ header {
 }
 
 .input-group label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    color: #777;
     margin-bottom: 8px;
-    color: #888;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .input-group input {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid #333;
-    padding: 12px 15px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid #222;
+    padding: 14px;
     color: #fff;
     font-family: inherit;
     font-size: 1rem;
-    border-radius: 6px;
+    border-radius: 4px;
     outline: none;
-    transition: border 0.3s ease;
 }
 
 .input-group input:focus {
-    border-color: var(--neon-cyan);
-    box-shadow: 0 0 8px rgba(0, 243, 255, 0.3);
+    border-color: var(--cyan-glow);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
 }
 
-/* Interactive Signature Checkbox */
 .checkbox-group {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 30px;
-    cursor: pointer;
+    margin-bottom: 25px;
+    font-size: 0.85rem;
+    color: #ccc;
 }
 
-.checkbox-group input[type="checkbox"] {
-    accent-color: var(--neon-cyan);
-    width: 18px;
-    height: 18px;
-}
-
-.checkbox-group label {
-    font-size: 0.9rem;
-    color: #bbb;
-    user-select: none;
-}
-
-/* Operational Button Layout */
+/* Custom Verification Control Actions */
 .btn-verify {
     width: 100%;
     background: transparent;
-    border: 1px solid var(--neon-purple);
+    border: 1px solid var(--purple-glow);
     color: #fff;
-    padding: 15px;
+    padding: 16px;
     font-family: inherit;
     font-size: 1rem;
     font-weight: bold;
-    letter-spacing: 2px;
-    border-radius: 6px;
     cursor: pointer;
-    text-transform: uppercase;
-    box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
-    transition: all 0.3s ease;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    transition: all 0.3s;
 }
 
 .btn-verify:hover {
-    background: var(--neon-purple);
-    box-shadow: 0 0 20px var(--neon-purple);
-    transform: translateY(-2px);
+    background: var(--purple-glow);
+    box-shadow: 0 0 20px var(--purple-glow);
 }
 
-.btn-verify:disabled {
-    border-color: #444;
-    color: #666;
-    background: rgba(0,0,0,0.4);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+/* Chat Log Shell Interface Area layout specs */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
-/* Floating AI Assistant Core Widget */
-#anis-widget {
+.diagnostics-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-diag {
+    background: transparent;
+    border: 1px solid var(--cyan-glow);
+    color: var(--cyan-glow);
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+}
+
+.status-indicator {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: #111;
+}
+
+.status-indicator.online { color: #00ff66; border: 1px solid #00ff66; }
+.status-indicator.offline { color: var(--alert-crimson); border: 1px solid var(--alert-crimson); }
+
+.chat-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #222;
+    border-radius: 4px;
+}
+
+.chat-log {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    font-size: 0.95rem;
+}
+
+.chat-bubble {
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.chat-bubble.operator { color: #fff; }
+.chat-bubble.anis-ai { color: var(--cyan-glow); }
+.chat-bubble.error { color: var(--alert-crimson); }
+
+.chat-input-area {
+    display: flex;
+    border-top: 1px solid #222;
+}
+
+#chat-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 20px;
+    color: #fff;
+    font-family: inherit;
+    outline: none;
+}
+
+.btn-send {
+    background: transparent;
+    border: none;
+    color: var(--cyan-glow);
+    padding: 0 25px;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+/* Floating Component Setup Positioning UI Core */
+#anis-widget-container {
     position: fixed;
     bottom: 30px;
     right: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px;
+    z-index: 9999;
+}
+
+#anis-widget-button {
+    background: var(--terminal-void);
+    border: 2px solid var(--purple-glow);
     width: 65px;
     height: 65px;
-    background: var(--dark-void);
-    border: 2px solid var(--neon-purple);
     border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(188, 19, 254, 0.3);
+    transition: all 0.3s;
 }
 
-#anis-widget i {
-    color: var(--neon-purple);
-    font-size: 1.5rem;
+#anis-widget-button i { color: var(--purple-glow); font-size: 1.4rem; }
+.widget-label { font-size: 0.6rem; color: #aaa; margin-top: 2px; }
+
+#anis-widget-button:hover {
+    transform: scale(1.05);
+    border-color: var(--cyan-glow);
+    box-shadow: 0 0 20px var(--cyan-glow);
 }
 
-#anis-widget:hover {
-    transform: scale(1.1) rotate(15deg);
-    border-color: var(--neon-cyan);
-    box-shadow: 0 0 20px var(--neon-cyan);
+#anis-widget-button:hover i { color: var(--cyan-glow); }
+
+.widget-chat {
+    width: 320px;
+    height: 400px;
+    background: var(--glass-hull);
+    border: 1px solid var(--purple-glow);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 25px rgba(0,0,0,0.8);
 }
 
-#anis-widget:hover i {
-    color: var(--neon-cyan);
+.widget-header {
+    background: rgba(188, 19, 254, 0.15);
+    padding: 12px;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(188, 19, 254, 0.3);
 }
 
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; text-shadow: 0 0 10px var(--neon-cyan); }
-    100% { opacity: 0.6; }
+#close-widget-btn { background: transparent; border: none; color: #fff; cursor: pointer; font-size: 1.2rem; }
+
+.widget-log { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.85rem; }
+
+.widget-input-form { display: flex; border-top: 1px solid rgba(255,255,255,0.1); }
+.widget-input-form input { flex: 1; background: #000; border: none; padding: 12px; color: #fff; font-family: inherit; font-size: 0.85rem; outline: none; }
+.widget-input-form button { background: transparent; border: none; color: var(--purple-glow); padding: 0 15px; cursor: pointer; }
+
+/* Utilities Base Logic Blocks */
+.hidden { display: none !important; }
+@keyframes beacon {
+    0%, 100% { opacity: 0.5; text-shadow: none; }
+    50% { opacity: 1; text-shadow: 0 0 10px var(--cyan-glow); }
 }
