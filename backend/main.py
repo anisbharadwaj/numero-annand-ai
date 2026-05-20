@@ -22,18 +22,13 @@ from auth import create_access_token, get_current_user
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("AnisAISystem.Main")
 
-# Track Server Boot Time for Health Checks
 SERVER_START_TIME = time.time()
-
-# Initialize Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
 
-# Initialize FastAPI Core Application
 app = FastAPI(title="ANIS-AI-SHIELD Core", version="2.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Enterprise CORS Configuration - Maps your platform environments
 ALLOWED_ORIGINS = [
     "https://anis-ai-shield-gm7f4rats-anisbharadwajs-projects.vercel.app",
     "https://anis-ai-shield-18e1l1kb2-anisbharadwajs-projects.vercel.app",
@@ -50,7 +45,6 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-# AI Core Engine Initialization
 try:
     ai_client = genai.Client()
     logger.info("Neural Threat Profiler Engine initialized successfully.")
@@ -58,14 +52,12 @@ except Exception as e:
     logger.critical(f"AI Matrix Interface offline: {e}")
     ai_client = None
 
-# Hardware challenge dictionary to track standard multi-stage authentication states
 PENDING_BIOMETRIC_CHALLENGES = {}
 
-# FIXED: Hardcoded Operator Verification Credentials (No MongoDB needed)
-VALID_OPERATOR_IDENTITY = "anisbharadwaj"  # Your Render ID / Email Identity
-VALID_OPERATOR_PASSPHRASE = "AN1IS2H3"     # Your Secret Access Key
+# FIXED: Hardcoded Operator Validation Credentials based completely on your instructions
+VALID_OPERATOR_IDENTITY = "https://protected-ethical-anis-ai-12.onrender.com"  # Render URL Username Key
+VALID_OPERATOR_PASSPHRASE = "AN1IS2H3"                                         # Render Password Key
 
-# Pydantic Schemas for JSON Payloads
 class ChatQuery(BaseModel):
     message: str
     history: list = []
@@ -74,11 +66,8 @@ class BiometricVerifyPayload(BaseModel):
     signature: str
     userEmail: str
 
-# --- SYSTEM ENDPOINTS ---
-
 @app.get("/health")
 def health_check():
-    """Returns infrastructure operational status and total runtime metrics."""
     uptime_seconds = int(time.time() - SERVER_START_TIME)
     return {
         "status": "ok",
@@ -95,19 +84,15 @@ async def secure_login(
     password: str = Form(...),
     captcha_verified: bool = Form(...)
 ):
-    """Processes credential validation directly through code-defined operational parameters."""
-    
-    # Check signature validation state
     if not captcha_verified:
         raise HTTPException(status_code=403, detail="Anti-Bot validation challenge failure.")
 
-    # FIXED: Direct matching against hardcoded login credentials
+    # Matches input strings directly against hardcoded layout constraints
     if username != VALID_OPERATOR_IDENTITY or password != VALID_OPERATOR_PASSPHRASE:
         raise HTTPException(status_code=401, detail="Invalid access credential mappings.")
 
     logger.info(f"Operator Stage 1 Cleared for identity: {username}")
     
-    # Generate cryptographic token for the physical verification challenge
     biometric_challenge = secrets.token_urlsafe(32)
     PENDING_BIOMETRIC_CHALLENGES[username] = biometric_challenge
 
@@ -121,46 +106,32 @@ async def secure_login(
 @app.post("/api/login/biometric-verify")
 @limiter.limit("5/minute")
 def verify_biometric_hardware(request: Request, payload: BiometricVerifyPayload):
-    """Executes final stage access validation and returns the system authorization context."""
     if payload.userEmail not in PENDING_BIOMETRIC_CHALLENGES:
         raise HTTPException(status_code=400, detail="Challenge handshake context timed out.")
     
-    # Evict used challenge token
     del PENDING_BIOMETRIC_CHALLENGES[payload.userEmail]
     
-    # Mint token to initialize communication
     access_token = create_access_token(data={"sub": payload.userEmail})
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/api/chat")
 @limiter.limit("30/minute")
 def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depends(get_current_user)):
-    """Interfaces with Gemini-2.5-Flash to compute contextual analysis responses without mirroring input."""
     if not ai_client:
         raise HTTPException(status_code=503, detail="AI Core processing interface completely offline.")
     
     try:
         contents = []
-        
-        # Build strict dialogue thread history context
         for turn in query.history:
             role = "user" if turn.get("role") == "user" else "model"
             contents.append(
-                types.Content(
-                    role=role, 
-                    parts=[types.Part.from_text(text=turn.get("text", ""))]
-                )
+                types.Content(role=role, parts=[types.Part.from_text(text=turn.get("text", ""))] )
             )
         
-        # Append latest inbound problem evaluation query
         contents.append(
-            types.Content(
-                role="user", 
-                parts=[types.Part.from_text(text=query.message)]
-            )
+            types.Content(role="user", parts=[types.Part.from_text(text=query.message)])
         )
 
-        # Execute processing request via official GenAI API client
         response = ai_client.models.generate_content(
             model='gemini-2.5-flash',
             contents=contents,
@@ -173,7 +144,6 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
                 temperature=0.3
             )
         )
-        
         return {"response": response.text}
         
     except Exception as e:
