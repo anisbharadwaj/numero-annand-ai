@@ -1,357 +1,331 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANIS AI SYSTEM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<title>ANIS AI SYSTEM</title>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #05070d;
+            color: white;
+            overflow: hidden;
+        }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+        /* BACKGROUND */
+        body::before {
+            content: "";
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at top left, #00f0ff22, transparent 35%),
+                radial-gradient(circle at bottom right, #ff00ff22, transparent 35%);
+            z-index: -1;
+        }
 
-<style>
+        /* MAIN CONTAINER */
+        .main-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+        /* LOGIN BOX */
+        .login-box {
+            width: 100%;
+            max-width: 520px;
+            background: rgba(10, 15, 25, 0.85);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 22px;
+            padding: 40px;
+            box-shadow:
+                0 0 40px rgba(0, 255, 255, 0.2),
+                0 0 80px rgba(255, 0, 255, 0.12);
+            position: relative;
+        }
 
-body{
-    font-family:Arial, Helvetica, sans-serif;
-    background:#05070d;
-    color:white;
-    overflow:hidden;
-}
+        /* TITLE */
+        .logo {
+            text-align: center;
+            margin-bottom: 35px;
+        }
 
-/* BACKGROUND */
+        .logo h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #00f0ff;
+            letter-spacing: 3px;
+            text-shadow:
+                0 0 10px #00f0ff,
+                0 0 30px #00f0ff;
+        }
 
-body::before{
-    content:"";
-    position:fixed;
-    width:100%;
-    height:100%;
-    background:
-    radial-gradient(circle at top left,#00f0ff22,transparent 35%),
-    radial-gradient(circle at bottom right,#ff00ff22,transparent 35%);
-    z-index:-1;
-}
+        .logo p {
+            margin-top: 10px;
+            color: #c9d4ff;
+            font-size: 15px;
+            font-weight: bold;
+        }
 
-/* MAIN CONTAINER */
+        /* LABELS */
+        .label {
+            display: block;
+            margin-bottom: 10px;
+            margin-top: 18px;
+            font-size: 15px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
 
-.main-container{
-    width:100%;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-}
+        /* INPUTS */
+        .input-box {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            outline: none;
+            border-radius: 12px;
+            background: #101826;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            transition: 0.3s;
+        }
 
-/* LOGIN BOX */
+        .input-box:focus {
+            border: 2px solid #00f0ff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
 
-.login-box{
-    width:100%;
-    max-width:520px;
-    background:rgba(10,15,25,0.85);
-    border:1px solid rgba(0,255,255,0.2);
-    backdrop-filter:blur(12px);
-    border-radius:22px;
-    padding:40px;
-    box-shadow:
-    0 0 40px rgba(0,255,255,0.2),
-    0 0 80px rgba(255,0,255,0.12);
-    position:relative;
-}
+        /* LOGIN INFO */
+        .info-box {
+            margin-top: 18px;
+            padding: 14px;
+            background: #0f1624;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
 
-/* TITLE */
+        .info-box p {
+            margin: 8px 0;
+            color: #dbe4ff;
+            font-size: 14px;
+            font-weight: bold;
+        }
 
-.logo{
-    text-align:center;
-    margin-bottom:35px;
-}
+        /* CAPTCHA */
+        .captcha-box {
+            margin-top: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.logo h1{
-    font-size:3rem;
-    font-weight:900;
-    color:#00f0ff;
-    letter-spacing:3px;
-    text-shadow:
-    0 0 10px #00f0ff,
-    0 0 30px #00f0ff;
-}
+        .captcha-box input {
+            width: 20px;
+            height: 20px;
+        }
 
-.logo p{
-    margin-top:10px;
-    color:#c9d4ff;
-    font-size:15px;
-    font-weight:bold;
-}
+        .captcha-box label {
+            font-weight: 900;
+            color: #00f0ff;
+        }
 
-/* LABELS */
+        /* BUTTON */
+        .login-btn {
+            width: 100%;
+            margin-top: 28px;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(90deg, #00f0ff, #ff00ff);
+            color: black;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+        }
 
-.label{
-    display:block;
-    margin-bottom:10px;
-    margin-top:18px;
-    font-size:15px;
-    font-weight:900;
-    color:#ffffff;
-    letter-spacing:1px;
-}
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 0 20px #00f0ff,
+                0 0 40px #ff00ff;
+        }
 
-/* INPUTS */
+        /* SECURITY TEXT */
+        .security {
+            margin-top: 22px;
+            text-align: center;
+            color: #8ea1d1;
+            font-size: 13px;
+            font-weight: bold;
+        }
 
-.input-box{
-    width:100%;
-    padding:16px;
-    border:none;
-    outline:none;
-    border-radius:12px;
-    background:#101826;
-    color:white;
-    font-size:16px;
-    font-weight:bold;
-    border:2px solid rgba(0,255,255,0.2);
-    transition:0.3s;
-}
+        /* AI STATUS */
+        .status {
+            margin-top: 25px;
+            text-align: center;
+            color: #00ff9d;
+            font-weight: 900;
+            font-size: 14px;
+        }
 
-.input-box:focus{
-    border:2px solid #00f0ff;
-    box-shadow:0 0 20px rgba(0,255,255,0.4);
-}
-
-/* LOGIN INFO */
-
-.info-box{
-    margin-top:18px;
-    padding:14px;
-    background:#0f1624;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,0.08);
-}
-
-.info-box p{
-    margin:8px 0;
-    color:#dbe4ff;
-    font-size:14px;
-    font-weight:bold;
-}
-
-/* CAPTCHA */
-
-.captcha-box{
-    margin-top:22px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.captcha-box input{
-    width:20px;
-    height:20px;
-}
-
-.captcha-box label{
-    font-weight:900;
-    color:#00f0ff;
-}
-
-/* BUTTON */
-
-.login-btn{
-    width:100%;
-    margin-top:28px;
-    padding:16px;
-    border:none;
-    border-radius:14px;
-    background:linear-gradient(90deg,#00f0ff,#ff00ff);
-    color:black;
-    font-size:18px;
-    font-weight:900;
-    cursor:pointer;
-    transition:0.3s;
-    box-shadow:0 0 25px rgba(0,255,255,0.3);
-}
-
-.login-btn:hover{
-    transform:translateY(-3px);
-    box-shadow:
-    0 0 20px #00f0ff,
-    0 0 40px #ff00ff;
-}
-
-/* SECURITY TEXT */
-
-.security{
-    margin-top:22px;
-    text-align:center;
-    color:#8ea1d1;
-    font-size:13px;
-    font-weight:bold;
-}
-
-/* AI STATUS */
-
-.status{
-    margin-top:25px;
-    text-align:center;
-    color:#00ff9d;
-    font-weight:900;
-    font-size:14px;
-}
-
-/* RESPONSIVE */
-
-@media(max-width:600px){
-
-.logo h1{
-    font-size:2.2rem;
-}
-
-.login-box{
-    padding:28px;
-}
-
-}
-
-</style>
+        /* RESPONSIVE */
+        @media(max-width:600px) {
+            .logo h1 {
+                font-size: 2.2rem;
+            }
+            .login-box {
+                padding: 28px;
+            }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="main-container">
+    <div class="main-container">
+        <div class="login-box">
+            <div class="logo">
+                <h1>ANIS AI SYSTEM</h1>
+                <p>ULTRA SECURE AI TERMINAL</p>
+            </div>
 
-<div class="login-box">
+            <form id="loginForm">
+                <label class="label">
+                    RENDER URL (BRACKET: ENTER YOUR RENDER WEBSITE URL)
+                </label>
+                <input 
+                    type="text" 
+                    id="renderUrl" 
+                    class="input-box" 
+                    placeholder="https://protected-ethical-anis-ai-12.onrender.com" 
+                    required
+                >
 
-<div class="logo">
-<h1>ANIS AI SYSTEM</h1>
-<p>ULTRA SECURE AI TERMINAL</p>
-</div>
+                <label class="label">
+                    RENDER PASSWORD (BRACKET: ENTER YOUR SECURE PASSWORD)
+                </label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    class="input-box" 
+                    placeholder="Enter Secure Password" 
+                    required
+                >
 
-<form id="loginForm">
+                <div class="info-box">
+                    <p><i class="fa-solid fa-shield-halved"></i> Only authorized Render users can access this AI.</p>
+                    <p><i class="fa-solid fa-lock"></i> Protected with AI Human Verification.</p>
+                    <p><i class="fa-solid fa-terminal"></i> Direct access to ANIS AI Dashboard after login.</p>
+                </div>
 
-<label class="label">
-RENDER URL
-(BRACKET: ENTER YOUR RENDER WEBSITE URL)
-</label>
+                <div class="captcha-box">
+                    <input type="checkbox" id="humanCheck" required>
+                    <label for="humanCheck">I AM HUMAN — VERIFY IDENTITY</label>
+                </div>
 
-<input
-type="text"
-id="renderUrl"
-class="input-box"
-placeholder="https://protected-ethical-anis-ai-12.onrender.com"
-required
->
+                <button type="submit" class="login-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> LAUNCH ANIS AI
+                </button>
+            </form>
 
-<label class="label">
-RENDER PASSWORD
-(BRACKET: ENTER YOUR SECURE PASSWORD)
-</label>
+            <div class="security">MILITARY GRADE AI SECURITY ENABLED</div>
+            <div class="status">● AI CORE STATUS : ONLINE</div>
+        </div>
+    </div>
 
-<input
-type="password"
-id="password"
-class="input-box"
-placeholder="Enter Secure Password"
-required
->
+    <script>
+        // CONFIGURATION: Points directly to your active Render service root address
+        const API_BASE_URL = "https://protected-ethical-anis-ai-12.onrender.com";
+        const form = document.getElementById("loginForm");
 
-<div class="info-box">
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
 
-<p>
-<i class="fa-solid fa-shield-halved"></i>
-Only authorized Render users can access this AI.
-</p>
+            const renderUrl = document.getElementById("renderUrl").value.trim();
+            const password = document.getElementById("password").value;
+            const humanCheck = document.getElementById("humanCheck").checked;
+            const btn = document.querySelector(".login-btn");
 
-<p>
-<i class="fa-solid fa-lock"></i>
-Protected with AI Human Verification.
-</p>
+            if (!humanCheck) {
+                alert("[ACCESS DENIED]: Please confirm you are human.");
+                return;
+            }
 
-<p>
-<i class="fa-solid fa-terminal"></i>
-Direct access to ANIS AI Dashboard after login.
-</p>
+            // Visual Processing Indicator Update
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> RUNNING DECRYPTION CHECK...`;
+            btn.disabled = true;
 
-</div>
+            // Formulate data structure to cleanly match FastAPI Form parameters
+            const formData = new FormData();
+            formData.append("username", renderUrl);
+            formData.append("password", password);
+            formData.append("captcha_verified", humanCheck ? "true" : "false");
 
-<div class="captcha-box">
-<input type="checkbox" id="humanCheck" required>
-<label for="humanCheck">
-I AM HUMAN — VERIFY IDENTITY
-</label>
-</div>
+            try {
+                // Request authorization token access from the Render backend
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: "POST",
+                    body: formData
+                });
 
-<button type="submit" class="login-btn">
-<i class="fa-solid fa-right-to-bracket"></i>
-LAUNCH ANIS AI
-</button>
+                const data = await response.json();
 
-</form>
+                if (!response.ok) {
+                    throw new Error(data.detail || "Authentication mapping verification failure.");
+                }
 
-<div class="security">
-MILITARY GRADE AI SECURITY ENABLED
-</div>
+                // If Stage 1 clears, trigger backend automated handshake verification instantly
+                if (data.requires_biometrics) {
+                    const bioData = {
+                        signature: data.biometric_challenge,
+                        userEmail: data.user_identity
+                    };
 
-<div class="status">
-● AI CORE STATUS : ONLINE
-</div>
+                    const bioResponse = await fetch(`${API_BASE_URL}/api/login/biometric-verify`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(bioData)
+                    });
 
-</div>
+                    const bioResult = await bioResponse.json();
 
-</div>
+                    if (!bioResponse.ok) {
+                        throw new Error(bioResult.detail || "Biometric hardware signature verification failed.");
+                    }
 
-<script>
+                    // Save verified cryptographic session token
+                    sessionStorage.setItem("anis_token", bioResult.access_token);
+                    localStorage.setItem("anis_ai_logged", "true");
 
-const form = document.getElementById("loginForm");
-
-form.addEventListener("submit", async function(e){
-
-e.preventDefault();
-
-const renderUrl = document.getElementById("renderUrl").value.trim();
-const password = document.getElementById("password").value.trim();
-const humanCheck = document.getElementById("humanCheck").checked;
-
-if(!humanCheck){
-    alert("Please verify that you are human.");
-    return;
-}
-
-if(renderUrl.length < 10){
-    alert("Please enter valid Render URL.");
-    return;
-}
-
-if(password.length < 4){
-    alert("Password too short.");
-    return;
-}
-
-try{
-
-const btn = document.querySelector(".login-btn");
-
-btn.innerHTML = "VERIFYING ACCESS...";
-btn.disabled = true;
-
-setTimeout(()=>{
-
-localStorage.setItem("anis_ai_logged","true");
-
-window.location.href = "dashboard.html";
-
-},2000);
-
-}catch(error){
-
-alert("Login failed.");
-
-}
-
-});
-
-</script>
-
+                    btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> DECRYPTION SUCCESSFUL`;
+                    
+                    // Transition smoothly to your system hub
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 1000);
+                }
+            } catch (error) {
+                alert(`[LOGIN FAILED]: ${error.message}`);
+                btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> LAUNCH ANIS AI`;
+                btn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
