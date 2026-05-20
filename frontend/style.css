@@ -1,42 +1,72 @@
+/* Full-page Dark Neon Hacker Theme */
+:root {
+    --neon-cyan: #00f3ff;
+    --neon-purple: #bc13fe;
+    --bg-dark: #050505;
+    --panel-bg: rgba(10, 10, 15, 0.85);
+}
+
 body, html {
-    height: 100%;
     margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--bg-dark);
+    color: var(--neon-cyan);
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+/* Fix: Remove restrictive max-widths to allow full-page scaling */
+.container {
+    width: 90vw;
+    height: 90vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #0a0a0a;
-    color: #fff;
-    font-family: 'Courier New', Courier, monospace;
 }
 
-header { padding: 20px; text-align: center; }
-
-.logo {
-    font-size: 2.6rem;
-    font-weight: 900;
-    letter-spacing: 5px;
-    margin: 0 auto;
-    text-shadow: 0 0 10px #00f2ff;
+.title-glow {
+    font-size: 3.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-purple);
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
-#auth-screen {
-    width: 100%;
-    max-width: 900px;
+.glass-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    border-radius: 10px;
     padding: 40px;
-    margin: 20px;
-    background: rgba(20, 20, 20, 0.9);
-    border: 1px solid #333;
-    border-radius: 12px;
-    text-align: left;
+    width: 100%;
+    max-width: 500px; /* Constrain only the login form, not the app */
+    backdrop-filter: blur(10px);
 }
 
-.input-group { margin-bottom: 15px; }
-input[type="email"], input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    background: #000;
-    border: 1px solid #444;
-    color: #fff;
+/* Floating AI Widget */
+#anis-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: var(--neon-purple);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--neon-purple);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+#anis-widget:hover {
+    transform: scale(1.1);
 }
