@@ -15,9 +15,8 @@ from slowapi.errors import RateLimitExceeded
 from google import genai
 from google.genai import types
 
-# Internal Module Imports (Assumes auth.py and database.py exist in the same directory)
-from auth import verify_password, create_access_token, get_current_user
-from database import get_user_profile, log_login_event, save_chat_session
+# System Authorization Utility
+from auth import create_access_token, get_current_user
 
 # Setup System Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -34,7 +33,7 @@ app = FastAPI(title="ANIS-AI-SHIELD Core", version="2.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Enterprise CORS Configuration - Explicitly maps all your platform environments
+# Enterprise CORS Configuration - Maps your platform environments
 ALLOWED_ORIGINS = [
     "https://anis-ai-shield-gm7f4rats-anisbharadwajs-projects.vercel.app",
     "https://anis-ai-shield-18e1l1kb2-anisbharadwajs-projects.vercel.app",
@@ -53,15 +52,18 @@ app.add_middleware(
 
 # AI Core Engine Initialization
 try:
-    # Looks for GEMINI_API_KEY environment variable automatically
     ai_client = genai.Client()
     logger.info("Neural Threat Profiler Engine initialized successfully.")
 except Exception as e:
-    logger.critical(f"AI Matrix Interface completely offline: {e}")
+    logger.critical(f"AI Matrix Interface offline: {e}")
     ai_client = None
 
 # Hardware challenge dictionary to track standard multi-stage authentication states
 PENDING_BIOMETRIC_CHALLENGES = {}
+
+# FIXED: Hardcoded Operator Verification Credentials (No MongoDB needed)
+VALID_OPERATOR_IDENTITY = "anisbharadwaj"  # Your Render ID / Email Identity
+VALID_OPERATOR_PASSPHRASE = "AN1IS2H3"     # Your Secret Access Key
 
 # Pydantic Schemas for JSON Payloads
 class ChatQuery(BaseModel):
@@ -93,26 +95,17 @@ async def secure_login(
     password: str = Form(...),
     captcha_verified: bool = Form(...)
 ):
-    """Processes stage-one credential validation using application/x-www-form-urlencoded payloads."""
-    ip = get_remote_address(request)
+    """Processes credential validation directly through code-defined operational parameters."""
     
     # Check signature validation state
     if not captcha_verified:
-        log_login_event(username, "BLOCKED_BY_CAPTCHA", ip)
         raise HTTPException(status_code=403, detail="Anti-Bot validation challenge failure.")
 
-    # Match system mapping credentials
-    user_record = get_user_profile(username)
-    if not user_record:
-        log_login_event(username, "USER_NOT_FOUND", ip)
+    # FIXED: Direct matching against hardcoded login credentials
+    if username != VALID_OPERATOR_IDENTITY or password != VALID_OPERATOR_PASSPHRASE:
         raise HTTPException(status_code=401, detail="Invalid access credential mappings.")
 
-    # Verify cryptographic password hash match
-    if not verify_password(password, user_record.get("hashed_password")):
-        log_login_event(username, "INVALID_PASSWORD", ip)
-        raise HTTPException(status_code=401, detail="Invalid access credential mappings.")
-
-    log_login_event(username, "STAGE_1_CLEARED", ip, "AI Assessment Passed")
+    logger.info(f"Operator Stage 1 Cleared for identity: {username}")
     
     # Generate cryptographic token for the physical verification challenge
     biometric_challenge = secrets.token_urlsafe(32)
@@ -129,15 +122,11 @@ async def secure_login(
 @limiter.limit("5/minute")
 def verify_biometric_hardware(request: Request, payload: BiometricVerifyPayload):
     """Executes final stage access validation and returns the system authorization context."""
-    ip = get_remote_address(request)
-    
     if payload.userEmail not in PENDING_BIOMETRIC_CHALLENGES:
         raise HTTPException(status_code=400, detail="Challenge handshake context timed out.")
     
     # Evict used challenge token
     del PENDING_BIOMETRIC_CHALLENGES[payload.userEmail]
-    
-    log_login_event(payload.userEmail, "SUCCESSFUL_AUTHENTICATION", ip)
     
     # Mint token to initialize communication
     access_token = create_access_token(data={"sub": payload.userEmail})
@@ -184,9 +173,6 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
                 temperature=0.3
             )
         )
-        
-        # Write execution artifact log to database
-        save_chat_session(current_user, query.message, response.text)
         
         return {"response": response.text}
         
