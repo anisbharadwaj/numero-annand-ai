@@ -2,21 +2,22 @@ import os
 import time
 import logging
 import secrets
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, Form, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Security and Rate Limiting
+# Security, JWT and Throttling Core
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 
 # Google GenAI SDK
 from google import genai
 from google.genai import types
-
-# System Authorization Utility (Imported from auth.py)
-from auth import create_access_token, get_current_user
 
 # Setup System Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -29,7 +30,34 @@ app = FastAPI(title="ANIS-AI-SHIELD Core", version="2.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# FIXED: Direct browser permission whitelist to eliminate "Failed to fetch" CORS blocks
+# JWT TOKEN INFRASTRUCTURE (Brought directly inside to fix the exit status 1 crash)
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "AN1IS2H3_SECURITY_MATRIX_SALT_9921X")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
+
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate operator session tokens.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        return username
+    except JWTError:
+        raise credentials_exception
+
+# PERMISSION MATRIX FOR CLIENT APPS
 ALLOWED_ORIGINS = [
     "https://anis-ai-shield-gu2q07cju-anisbharadwajs-projects.vercel.app",
     "https://anis-ai-shield.vercel.app",
@@ -124,28 +152,19 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
         contents = []
         for turn in query.history:
             role = "user" if turn.get("role") == "user" else "model"
-            contents.append(
-                types.Content(role=role, parts=[types.Part.from_text(text=turn.get("text", ""))] )
-            )
+            contents.append(types.Content(role=role, parts=[types.Part.from_text(text=turn.get("text", ""))] ))
         
-        contents.append(
-            types.Content(role="user", parts=[types.Part.from_text(text=query.message)])
-        )
+        contents.append(types.Content(role="user", parts=[types.Part.from_text(text=query.message)]))
 
         response = ai_client.models.generate_content(
             model='gemini-2.5-flash',
             contents=contents,
             config=types.GenerateContentConfig(
-                system_instruction=(
-                    "You are ANIS-AI-SHIELD, an advanced, highly specialized AI platform terminal "
-                    "engineered for secure systems administration. Analyze incoming requests deeply "
-                    "and deliver clear, technical solutions with formatted code blocks."
-                ),
+                system_instruction="You are ANIS-AI-SHIELD, a secure system terminal backend.",
                 temperature=0.3
             )
         )
         return {"response": response.text}
-        
     except Exception as e:
         logger.error(f"Chat processing error: {e}")
         raise HTTPException(status_code=500, detail="Internal processing error computing data streams.")
