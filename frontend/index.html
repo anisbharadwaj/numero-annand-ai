@@ -27,28 +27,32 @@
                 </div>
                 
                 <div class="auth-instructions">
-                    <p><strong>SECURITY OPERATOR CLEARANCE REQUIRED:</strong></p>
+                    <p><strong>[SECURITY OPERATOR CLEARANCE REQUIRED]:</strong></p>
                     <ul class="instruction-list">
-                        <li><strong>Identity:</strong> Input your verified system email.</li>
-                        <li><strong>Passphrase:</strong> Input your cryptographic security token.</li>
-                        <li><strong>Signature:</strong> Attest to the ethical matrix toggle below.</li>
+                        <li><strong>Identity Key:</strong> Input your unique Render Identifier.</li>
+                        <li><strong>Passphrase:</strong> Input your cryptographic access key.</li>
+                        <li><strong>Signature:</strong> The ethical operator toggle must be active.</li>
                     </ul>
                 </div>
 
                 <form id="login-form">
                     <div class="input-group">
-                        <label for="email"><i class="fas fa-user-shield"></i> Operator Email</label>
-                        <input type="email" id="email" required placeholder="identity@anisai.network" autocomplete="off">
+                        <label for="email">
+                            <strong><i class="fas fa-link"></i> OPERATOR RENDER URL [Type: https://protected-ethical-anis-ai-12.onrender.com]</strong>
+                        </label>
+                        <input type="text" id="email" required placeholder="https://protected-ethical-anis-ai-12.onrender.com" autocomplete="off">
                     </div>
 
                     <div class="input-group">
-                        <label for="password"><i class="fas fa-key"></i> Access Phrase</label>
+                        <label for="password">
+                            <strong><i class="fas fa-key"></i> SYSTEM PASSPHRASE [Type: AN1IS2H3]</strong>
+                        </label>
                         <input type="password" id="password" required placeholder="••••••••••••">
                     </div>
 
                     <div class="checkbox-group">
                         <input type="checkbox" id="captcha_verified" required>
-                        <label for="captcha_verified">Confirm Ethical Operator Signature</label>
+                        <label for="captcha_verified"><strong>Confirm Ethical Operator Signature Framework</strong></label>
                     </div>
 
                     <button type="submit" class="btn-verify" id="login-submit-btn">
