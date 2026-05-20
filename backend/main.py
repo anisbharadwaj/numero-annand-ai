@@ -29,9 +29,12 @@ app = FastAPI(title="ANIS-AI-SHIELD Core", version="2.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# FIXED: Added your exact active Vercel link from your screenshot to clear the network error
 ALLOWED_ORIGINS = [
+    "https://anis-ai-shield-gu2q07cju-anisbharadwajs-projects.vercel.app",
     "https://anis-ai-shield-gm7f4rats-anisbharadwajs-projects.vercel.app",
     "https://anis-ai-shield-18e1l1kb2-anisbharadwajs-projects.vercel.app",
+    "https://anis-ai-shield.vercel.app",
     "https://protected-ethical-anis-ai-12.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:5500"
@@ -54,9 +57,9 @@ except Exception as e:
 
 PENDING_BIOMETRIC_CHALLENGES = {}
 
-# FIXED: Hardcoded Operator Validation Credentials based completely on your instructions
-VALID_OPERATOR_IDENTITY = "https://protected-ethical-anis-ai-12.onrender.com"  # Render URL Username Key
-VALID_OPERATOR_PASSPHRASE = "AN1IS2H3"                                         # Render Password Key
+# Operator Validation Credentials
+VALID_OPERATOR_IDENTITY = "https://protected-ethical-anis-ai-12.onrender.com"  
+VALID_OPERATOR_PASSPHRASE = "AN1IS2H3"                                         
 
 class ChatQuery(BaseModel):
     message: str
@@ -87,7 +90,6 @@ async def secure_login(
     if not captcha_verified:
         raise HTTPException(status_code=403, detail="Anti-Bot validation challenge failure.")
 
-    # Matches input strings directly against hardcoded layout constraints
     if username != VALID_OPERATOR_IDENTITY or password != VALID_OPERATOR_PASSPHRASE:
         raise HTTPException(status_code=401, detail="Invalid access credential mappings.")
 
