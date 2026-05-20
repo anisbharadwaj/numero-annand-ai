@@ -15,7 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from google import genai
 from google.genai import types
 
-# System Authorization Utility
+# System Authorization Utility (Imported from auth.py)
 from auth import create_access_token, get_current_user
 
 # Setup System Logging
@@ -29,11 +29,9 @@ app = FastAPI(title="ANIS-AI-SHIELD Core", version="2.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# FIXED: Added your exact active Vercel link from your screenshot to clear the network error
+# FIXED: Direct browser permission whitelist to eliminate "Failed to fetch" CORS blocks
 ALLOWED_ORIGINS = [
     "https://anis-ai-shield-gu2q07cju-anisbharadwajs-projects.vercel.app",
-    "https://anis-ai-shield-gm7f4rats-anisbharadwajs-projects.vercel.app",
-    "https://anis-ai-shield-18e1l1kb2-anisbharadwajs-projects.vercel.app",
     "https://anis-ai-shield.vercel.app",
     "https://protected-ethical-anis-ai-12.onrender.com",
     "http://localhost:3000",
@@ -57,7 +55,7 @@ except Exception as e:
 
 PENDING_BIOMETRIC_CHALLENGES = {}
 
-# Operator Validation Credentials
+# Operator Credentials
 VALID_OPERATOR_IDENTITY = "https://protected-ethical-anis-ai-12.onrender.com"  
 VALID_OPERATOR_PASSPHRASE = "AN1IS2H3"                                         
 
@@ -120,7 +118,7 @@ def verify_biometric_hardware(request: Request, payload: BiometricVerifyPayload)
 @limiter.limit("30/minute")
 def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depends(get_current_user)):
     if not ai_client:
-        raise HTTPException(status_code=503, detail="AI Core processing interface completely offline.")
+        raise HTTPException(status_code=503, detail="AI Core processing interface offline.")
     
     try:
         contents = []
@@ -140,8 +138,8 @@ def chat_assistant(request: Request, query: ChatQuery, current_user: str = Depen
             config=types.GenerateContentConfig(
                 system_instruction=(
                     "You are ANIS-AI-SHIELD, an advanced, highly specialized AI platform terminal "
-                    "engineered for secure systems administration, optimization, and real-time analytical evaluation. "
-                    "Analyze incoming operator requests deeply and deliver clear, technical solutions with formatted code syntax blocks."
+                    "engineered for secure systems administration. Analyze incoming requests deeply "
+                    "and deliver clear, technical solutions with formatted code blocks."
                 ),
                 temperature=0.3
             )
