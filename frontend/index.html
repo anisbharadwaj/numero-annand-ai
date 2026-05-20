@@ -16,7 +16,7 @@
             font-family: Arial, Helvetica, sans-serif;
             background: #05070d;
             color: white;
-            overflow-y: auto; /* Allow scrolling if screen height is small */
+            overflow-y: auto;
             overflow-x: hidden;
         }
 
@@ -38,10 +38,10 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Changed from center to push title down safely */
+            justify-content: flex-start;
             align-items: center;
             padding: 20px;
-            padding-top: 60px; /* FIXED: Pushes your web title down so it is fully visible */
+            padding-top: 60px; /* Pushes the title down so it is clear and visible */
         }
 
         /* LOGIN BOX */
@@ -197,7 +197,7 @@
                 padding: 28px;
             }
             .main-container {
-                padding-top: 30px; /* Slightly tighter top margin on mobile screens */
+                padding-top: 30px;
             }
         }
     </style>
@@ -275,7 +275,6 @@
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> RUNNING DECRYPTION CHECK...`;
             btn.disabled = true;
 
-            // Use URLSearchParams to enforce perfect urlencoded formatting compatibility with your backend
             const urlEncodedData = new URLSearchParams();
             urlEncodedData.append("username", renderUrl);
             urlEncodedData.append("password", password);
@@ -314,7 +313,6 @@
                         throw new Error(bioResult.detail || "Biometric hardware signature verification failed.");
                     }
 
-                    // Store verification parameters safely
                     sessionStorage.setItem("anis_token", bioResult.access_token);
                     localStorage.setItem("anis_ai_logged", "true");
 
