@@ -1,47 +1,28 @@
 import os
-import json
-import logging
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker
-from backend.auth import get_password_hash
+from sqlalchemy.sql import func
 
-logger = logging.getLogger("Anis-AI-Database")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./anis_shield.db")
 
-DATABASE_URL = "sqlite:///./anis_shield.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+connect_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = "users"
+
     id = Column(Integer, primary_key=True, index=True)
-    render_url = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    username = Column(String(255), unique=True, index=True, nullable=False)  # Render URL
+    password_hash = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 
 def init_db():
     Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    
-    # Check if we need to seed users from environment variables
-    # Format expected in env: [{"url": "https://user1.onrender.com", "pass": "secure1"}]
-    seed_data = os.getenv("INITIAL_USERS", "[]")
-    try:
-        users_to_add = json.loads(seed_data)
-        for u in users_to_add:
-            existing = db.query(User).filter(User.render_url == u["url"]).first()
-            if not existing:
-                new_user = User(render_url=u["url"], hashed_password=get_password_hash(u["pass"]))
-                db.add(new_user)
-                logger.info(f"Seeded user: {u['url']}")
-        db.commit()
-    except Exception as e:
-        logger.error(f"Database seed failed: {e}")
-    finally:
-        db.close()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
