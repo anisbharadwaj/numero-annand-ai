@@ -1,10 +1,5 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "public": true,
-  "routes": [
-    { "src": "/style.css", "dest": "/frontend/style.css" },
-    { "src": "/script.js", "dest": "/frontend/script.js" },
-    { "src": "/(.*)", "dest": "/frontend/index.html" }
-  ]
+  "builds": [{"src": "frontend/**", "use": "@vercel/static"}],
+  "routes": [{"src": "/(.*)", "dest": "/frontend/$1"}]
 }
