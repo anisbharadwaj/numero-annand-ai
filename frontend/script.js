@@ -1,196 +1,123 @@
 const API_BASE_URL = "https://protected-ethical-anis-ai-12.onrender.com";
 
-let authToken = null;
-let chatHistory = [];
-let widgetHistory = [];
+const loginView = document.getElementById('login-view');
+const dashView = document.getElementById('dashboard-view');
+const monitor = document.getElementById('health-monitor');
+const loginBtn = document.getElementById('loginBtn');
 
-const authScreen = document.getElementById("auth-screen");
-const dashboardScreen = document.getElementById("dashboard-screen");
-const loginForm = document.getElementById("login-form");
-const loginBtn = document.getElementById("login-submit-btn");
+let chatHistory = []; // Stores AI memory context
 
-loginForm.addEventListener("submit", async (e) => {
+// 1. Backend Health Polling
+async function checkBackend() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/health`);
+        if (res.ok) {
+            const data = await res.json();
+            monitor.className = "status-box success";
+            monitor.innerHTML = `<i class="fa-solid fa-server"></i> ONLINE (v${data.version}) | Uptime: ${data.uptime}s`;
+            if(document.getElementById('dash-uptime')) {
+                document.getElementById('dash-uptime').innerText = `${data.uptime}s`;
+                document.getElementById('dash-ai').innerText = data.ai_connected ? "ONLINE" : "API KEY ERR";
+            }
+        } else throw new Error("Offline");
+    } catch (e) {
+        monitor.className = "status-box warning";
+        monitor.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> WAKING SERVER...`;
+    }
+}
+checkBackend();
+setInterval(checkBackend, 30000);
+
+// 2. Login Flow
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    const renderUrlInput = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const captchaChecked = document.getElementById("captcha_verified").checked;
-
+    loginBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AUTHENTICATING...`;
     loginBtn.disabled = true;
-    loginBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> RUNNING DECRYPTION CHECK...`;
 
-    const formData = new FormData();
-    formData.append("username", renderUrlInput);
-    formData.append("password", password);
-    formData.append("captcha_verified", captchaChecked ? "true" : "false");
+    const formData = new URLSearchParams();
+    formData.append("username", document.getElementById('username').value.trim());
+    formData.append("password", document.getElementById('password').value);
+    formData.append("captcha_verified", "true");
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/login`, {
+        const res = await fetch(`${API_BASE_URL}/api/login`, {
             method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: formData
         });
 
-        const data = await response.json();
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail);
 
-        if (!response.ok) {
-            throw new Error(data.detail || "Access mapping verification failure.");
-        }
-
-        if (data.requires_biometrics) {
-            const bioData = {
-                signature: data.biometric_challenge,
-                userEmail: data.user_identity
-            };
-
-            const bioResponse = await fetch(`${API_BASE_URL}/api/login/biometric-verify`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(bioData)
-            });
-
-            const bioResult = await bioResponse.json();
-
-            if (!bioResponse.ok) {
-                throw new Error(bioResult.detail || "Biometric validation structure failed.");
-            }
-
-            authToken = bioResult.access_token;
-            sessionStorage.setItem("anis_token", authToken);
-            
-            showNotification("Terminal Access Key Authorized.", "cyan");
-            launchDashboard();
-        }
-    } catch (err) {
-        showNotification(err.message, "red");
-        console.error("[GATEWAY FAILURE]", err);
-    } finally {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = `<i class="fas fa-unlock-alt"></i> INITIALIZE DECRYPTION`;
-    }
-});
-
-function launchDashboard() {
-    authScreen.classList.add("hidden");
-    dashboardScreen.classList.remove("hidden");
-    executeHealthCheck();
-}
-
-const chatForm = document.getElementById("chat-form");
-const chatInput = document.getElementById("chat-input");
-const chatTerminal = document.getElementById("chat-terminal");
-
-chatForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const queryText = chatInput.value.trim();
-    if (!queryText) return;
-
-    appendMessage(chatTerminal, "Operator", queryText);
-    chatInput.value = "";
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/chat`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ message: queryText, history: chatHistory })
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.detail || "Neural mapping processing disconnect.");
-
-        appendMessage(chatTerminal, "Anis-AI", data.response);
-        chatHistory.push({ role: "user", text: queryText });
-        chatHistory.push({ role: "model", text: data.response });
-
-    } catch (err) {
-        appendMessage(chatTerminal, "ERROR", err.message);
-    }
-});
-
-const checkHealthBtn = document.getElementById("check-health-btn");
-const healthDisplay = document.getElementById("health-status-display");
-
-async function executeHealthCheck() {
-    healthDisplay.textContent = "Querying core status...";
-    healthDisplay.className = "status-indicator processing";
-    try {
-        const res = await fetch(`${API_BASE_URL}/health`);
-        const stats = await res.json();
-        if (res.ok && stats.status === "ok") {
-            healthDisplay.textContent = `SYS: OPERATIONAL | Uptime: ${stats.uptime}s | AI: ${stats.ai_connected ? 'LINKED' : 'ERR'}`;
-            healthDisplay.className = "status-indicator online";
-        } else {
-            healthDisplay.textContent = "SYS: COLD_FAULT";
-            healthDisplay.className = "status-indicator offline";
-        }
-    } catch {
-        healthDisplay.textContent = "SYS: NET_DISCONNECT";
-        healthDisplay.className = "status-indicator offline";
-    }
-}
-checkHealthBtn.addEventListener("click", executeHealthCheck);
-
-const widgetBtn = document.getElementById("anis-widget-button");
-const widgetWindow = document.getElementById("anis-widget-window");
-const closeWidgetBtn = document.getElementById("close-widget-btn");
-const widgetForm = document.getElementById("widget-chat-form");
-const widgetInput = document.getElementById("widget-input");
-const widgetLog = document.getElementById("widget-chat-log");
-
-widgetBtn.addEventListener("click", () => widgetWindow.classList.toggle("hidden"));
-closeWidgetBtn.addEventListener("click", () => widgetWindow.classList.add("hidden"));
-
-widgetForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const txt = widgetInput.value.trim();
-    if (!txt) return;
-
-    appendMessage(widgetLog, "User", txt);
-    widgetInput.value = "";
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/chat`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": authToken ? `Bearer ${authToken}` : "" 
-            },
-            body: JSON.stringify({ message: txt, history: widgetHistory })
-        });
-        const data = await response.json();
-        if(!response.ok) throw new Error(data.detail || "Authentication Required for AI access.");
+        sessionStorage.setItem("anis_jwt", data.access_token);
+        document.getElementById('dash-user').innerText = data.user;
         
-        appendMessage(widgetLog, "Anis-AI", data.response);
-        widgetHistory.push({ role: "user", text: txt });
-        widgetHistory.push({ role: "model", text: data.response });
-    } catch(err) {
-        appendMessage(widgetLog, "ALERT", err.message);
+        loginBtn.innerHTML = `<i class="fa-solid fa-check-double"></i> ACCESS GRANTED`;
+        loginBtn.style.background = "var(--green)";
+        
+        setTimeout(() => {
+            loginView.classList.add('hidden');
+            dashView.classList.remove('hidden');
+            document.getElementById('openAiBtn').classList.remove('hidden');
+        }, 800);
+
+    } catch (error) {
+        monitor.className = "status-box error";
+        monitor.innerHTML = `<i class="fa-solid fa-ban"></i> ${error.message}`;
+        loginBtn.innerHTML = `<i class="fa-solid fa-terminal"></i> INITIATE CONNECTION`;
+        loginBtn.disabled = false;
     }
 });
 
-function appendMessage(targetLog, sender, text) {
-    const msg = document.createElement("div");
-    msg.className = `chat-bubble ${sender.toLowerCase()}`;
-    msg.innerHTML = `<strong>[${sender}]:</strong> <span>${text}</span>`;
-    targetLog.appendChild(msg);
-    targetLog.scrollTop = targetLog.scrollHeight;
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem("anis_jwt");
+    location.reload();
+});
+
+// 3. AI Chat System with Memory
+const aiWidget = document.getElementById('ai-widget');
+const openAiBtn = document.getElementById('openAiBtn');
+const chatBox = document.getElementById('chatBox');
+const aiInput = document.getElementById('aiInput');
+
+openAiBtn.addEventListener('click', () => { aiWidget.classList.remove('hidden'); openAiBtn.classList.add('hidden'); });
+document.getElementById('closeAi').addEventListener('click', () => { aiWidget.classList.add('hidden'); openAiBtn.classList.remove('hidden'); });
+
+async function sendChat() {
+    const text = aiInput.value.trim();
+    if (!text) return;
+
+    chatBox.innerHTML += `<div class="msg user">${text}</div>`;
+    aiInput.value = '';
+    
+    const typingId = 'typing-' + Date.now();
+    chatBox.innerHTML += `<div class="msg ai" id="${typingId}"><i class="fas fa-ellipsis fa-fade"></i></div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        const token = sessionStorage.getItem("anis_jwt");
+        const res = await fetch(`${API_BASE_URL}/api/chat`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ message: text, history: chatHistory })
+        });
+
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.detail);
+
+        // Update memory arrays
+        chatHistory.push({ role: "user", content: text });
+        chatHistory.push({ role: "model", content: data.reply });
+
+        document.getElementById(typingId).innerHTML = marked.parse(data.reply);
+    } catch (e) {
+        document.getElementById(typingId).innerHTML = `<span style="color:var(--red)">System Error: ${e.message}</span>`;
+    }
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function showNotification(text, toneColor) {
-    const alertBox = document.createElement("div");
-    alertBox.style.position = "fixed";
-    alertBox.style.top = "20px";
-    alertBox.style.left = "50%";
-    alertBox.style.transform = "translateX(-50%)";
-    alertBox.style.background = "#0a0a0f";
-    alertBox.style.color = toneColor === "cyan" ? "#00f3ff" : "#ff0055";
-    alertBox.style.border = `1px solid ${toneColor === "cyan" ? '#00f3ff' : '#ff0055'}`;
-    alertBox.style.padding = "12px 24px";
-    alertBox.style.fontFamily = "monospace";
-    alertBox.style.zIndex = "99999";
-    alertBox.textContent = `[NOTIFICATION]: ${text}`;
-    document.body.appendChild(alertBox);
-    setTimeout(() => alertBox.remove(), 4000);
-}
+document.getElementById('sendAi').addEventListener('click', sendChat);
+aiInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChat(); });
