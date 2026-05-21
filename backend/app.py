@@ -1,134 +1,220 @@
 import os
 import time
 import logging
-from fastapi import FastAPI, Depends, HTTPException, Form, Header
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
-import google.generativeai as genai
 
-from backend.database import engine, get_db, init_db, User, pwd_context
-from backend.auth import create_access_token, decode_token
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Form,
+    Header
+)
+
+from fastapi.middleware.cors import CORSMiddleware
+
+from pydantic import BaseModel
+
+from google import genai
+from google.genai import types
+
+from backend.database import find_user
+from backend.auth import (
+    create_access_token,
+    decode_token
+)
+
+# ---------------------------------------------------
+# LOGGING
+# ---------------------------------------------------
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("Anis-AI-API")
 
-SERVER_START = time.time()
-app = FastAPI(title="Anis-AI-Shield")
+logger = logging.getLogger("ANIS-AI-SHIELD")
 
-# Enable CORS for Vercel
+# ---------------------------------------------------
+# GEMINI CLIENT
+# ---------------------------------------------------
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+client = None
+
+if GEMINI_API_KEY:
+    try:
+        client = genai.Client(
+            api_key=GEMINI_API_KEY
+        )
+
+        logger.info("Gemini AI Connected")
+
+    except Exception as e:
+        logger.error(f"Gemini Init Error: {e}")
+
+# ---------------------------------------------------
+# APP
+# ---------------------------------------------------
+
+app = FastAPI(
+    title="Anis-AI-Shield",
+    version="3.0.0"
+)
+
+SERVER_START_TIME = time.time()
+
+# ---------------------------------------------------
+# CORS
+# ---------------------------------------------------
+
+VERCEL_URL = os.getenv(
+    "VERCEL_URL",
+    "https://anis-ai-shield.vercel.app"
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Accepts all origins to prevent Fetch Errors
+    allow_origins=[
+        VERCEL_URL,
+        "http://localhost:5500",
+        "http://127.0.0.1:5500"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-init_db()
+# ---------------------------------------------------
+# MODELS
+# ---------------------------------------------------
 
-# Setup AI
-GEMINI_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_KEY:
-    genai.configure(api_key=GEMINI_KEY)
-    sys_prompt = """You are Anis AI, the core intelligence of the Anis-AI-Shield platform.
-    Your duties: Assist the user with cybersecurity, analyze inputs, and explain the platform.
-    The platform uses a Render URL + Password login, followed by biometric Passkey 2FA.
-    Access to you requires an active Monthly (₹200) or Yearly (₹1200) membership paid via QR code.
-    Keep answers concise, highly intelligent, use markdown, and be helpful."""
-    ai_model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=sys_prompt)
-
-# Pydantic Models
-class ChatPayload(BaseModel):
+class ChatRequest(BaseModel):
     message: str
-    history: list = []
 
-class BiometricPayload(BaseModel):
-    credential_id: str
+# ---------------------------------------------------
+# HEALTH
+# ---------------------------------------------------
 
-# Endpoints
 @app.get("/health")
-def health():
+async def health():
+
     return {
-        "status": "ok", 
-        "uptime": int(time.time() - SERVER_START),
-        "version": "4.0.0-Production",
-        "ai_connected": bool(GEMINI_KEY)
+        "status": "ok",
+        "uptime": int(time.time() - SERVER_START_TIME),
+        "version": "3.0.0",
+        "ai_connected": bool(client)
     }
+
+# ---------------------------------------------------
+# LOGIN
+# ---------------------------------------------------
 
 @app.post("/api/login")
-def login(username: str = Form(...), password: str = Form(...), human_check: bool = Form(...), db: Session = Depends(get_db)):
-    if not human_check:
-        raise HTTPException(status_code=400, detail="Human verification required")
-    
-    user = db.query(User).filter(User.render_url == username).first()
-    if not user or not pwd_context.verify(password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid Credentials")
-    
-    token = create_access_token(data={"sub": user.render_url, "step": "password_cleared"})
+async def login(
+    username: str = Form(...),
+    password: str = Form(...),
+    captcha_verified: bool = Form(...)
+):
+
+    if not captcha_verified:
+        raise HTTPException(
+            status_code=403,
+            detail="Human verification required."
+        )
+
+    user = find_user(username)
+
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Render URL."
+        )
+
+    if user["pass"] != password:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid password."
+        )
+
+    token = create_access_token({
+        "sub": username
+    })
+
     return {
-        "access_token": token, 
-        "biometric_enabled": user.biometric_enabled,
-        "membership_tier": user.membership_tier,
-        "membership_active": user.membership_active
+        "access_token": token,
+        "token_type": "bearer"
     }
 
-@app.post("/api/biometrics/register")
-def register_biometric(payload: BiometricPayload, authorization: str = Header(None), db: Session = Depends(get_db)):
-    user_data = decode_token(authorization.split(" ")[1]) if authorization else None
-    if not user_data: raise HTTPException(status_code=401)
-    
-    user = db.query(User).filter(User.render_url == user_data["sub"]).first()
-    user.biometric_enabled = True
-    user.webauthn_credential_id = payload.credential_id
-    db.commit()
-    
-    full_token = create_access_token(data={"sub": user.render_url, "step": "fully_authenticated"})
-    return {"access_token": full_token, "status": "Biometrics Secured"}
-
-@app.post("/api/biometrics/verify")
-def verify_biometric(payload: BiometricPayload, authorization: str = Header(None), db: Session = Depends(get_db)):
-    user_data = decode_token(authorization.split(" ")[1]) if authorization else None
-    if not user_data: raise HTTPException(status_code=401)
-    
-    user = db.query(User).filter(User.render_url == user_data["sub"]).first()
-    if user.webauthn_credential_id != payload.credential_id:
-        raise HTTPException(status_code=403, detail="Biometric Mismatch. Intruder detected.")
-        
-    full_token = create_access_token(data={"sub": user.render_url, "step": "fully_authenticated"})
-    return {"access_token": full_token}
-
-@app.post("/api/membership/upgrade")
-def upgrade_membership(plan: str = Form(...), authorization: str = Header(None), db: Session = Depends(get_db)):
-    user_data = decode_token(authorization.split(" ")[1]) if authorization else None
-    if not user_data: raise HTTPException(status_code=401)
-    
-    user = db.query(User).filter(User.render_url == user_data["sub"]).first()
-    user.membership_tier = plan
-    user.membership_active = True 
-    db.commit()
-    return {"status": "Membership Upgraded"}
+# ---------------------------------------------------
+# CHAT
+# ---------------------------------------------------
 
 @app.post("/api/chat")
-def chat(payload: ChatPayload, authorization: str = Header(None), db: Session = Depends(get_db)):
-    if not authorization: raise HTTPException(status_code=401, detail="No Auth Token")
-    token_data = decode_token(authorization.split(" ")[1])
-    
-    if not token_data or token_data.get("step") != "fully_authenticated":
-        raise HTTPException(status_code=403, detail="Biometric Verification Required for AI Access")
-    
-    user = db.query(User).filter(User.render_url == token_data["sub"]).first()
-    if not user.membership_active:
-        raise HTTPException(status_code=402, detail="Active Membership Required. Please scan QR to upgrade.")
+async def chat(
+    request: ChatRequest,
+    authorization: str = Header(None)
+):
 
-    if not GEMINI_KEY:
-        raise HTTPException(status_code=500, detail="AI Core Offline. Awaiting API Key.")
+    if not authorization:
+        raise HTTPException(
+            status_code=401,
+            detail="Authorization missing"
+        )
+
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )
+
+    token = authorization.split(" ")[1]
+
+    decoded = decode_token(token)
+
+    if not decoded:
+        raise HTTPException(
+            status_code=401,
+            detail="Session expired"
+        )
+
+    if not client:
+        return {
+            "reply": "AI Core Offline. Gemini API key missing."
+        }
 
     try:
-        formatted_history = [{"role": m["role"], "parts": [m["content"]]} for m in payload.history]
-        chat_session = ai_model.start_chat(history=formatted_history)
-        response = chat_session.send_message(payload.message)
-        return {"reply": response.text}
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=request.message,
+
+            config=types.GenerateContentConfig(
+                system_instruction="""
+You are Anis AI.
+You are the intelligent AI assistant of Anis-AI-Shield.
+
+Rules:
+- Give clear answers
+- Help users properly
+- Explain website features
+- Explain dashboard
+- Explain memberships
+- Explain security
+- Explain login system
+- Be professional
+- Be intelligent
+- Never say connection severed
+- Always answer naturally
+"""
+            )
+        )
+
+        return {
+            "reply": response.text
+        }
+
     except Exception as e:
-        logger.error(f"AI Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+
+        logger.error(f"Gemini Error: {e}")
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI processing failed: {str(e)}"
+        )
