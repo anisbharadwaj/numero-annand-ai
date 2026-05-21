@@ -3,110 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANIS AI SYSTEM</title>
+    <title>Anis-AI-Shield</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #05070d;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #030508;
             color: white;
             overflow-y: auto;
             overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         body::before {
             content: ""; position: fixed; width: 100%; height: 100%;
-            background: radial-gradient(circle at top left, #00f0ff22, transparent 35%),
-                        radial-gradient(circle at bottom right, #ff00ff22, transparent 35%);
+            background: radial-gradient(circle at top left, rgba(0, 240, 255, 0.15), transparent 40%),
+                        radial-gradient(circle at bottom right, rgba(255, 0, 255, 0.15), transparent 40%);
             z-index: -1;
         }
-        .main-container {
-            width: 100%; min-height: 100vh;
-            display: flex; flex-direction: column;
-            justify-content: flex-start; align-items: center;
-            padding: 20px; padding-top: 60px;
+        
+        /* Local File Warning Protocol Overlay */
+        #file-warning {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 9999;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px;
         }
+        #file-warning h1 { color: #ff3333; font-size: 3rem; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255, 51, 51, 0.5); }
+        #file-warning p { color: white; font-size: 1.2rem; max-width: 600px; line-height: 1.6; }
+        #file-warning code { background: #222; padding: 5px 10px; color: #00f0ff; border-radius: 5px; }
+
         .login-box {
-            width: 100%; max-width: 520px; background: rgba(10, 15, 25, 0.85);
-            border: 1px solid rgba(0, 255, 255, 0.2); backdrop-filter: blur(12px);
-            border-radius: 22px; padding: 40px;
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.2), 0 0 80px rgba(255, 0, 255, 0.12);
+            width: 100%; max-width: 480px; background: rgba(10, 15, 25, 0.7);
+            border: 1px solid rgba(0, 240, 255, 0.3); backdrop-filter: blur(15px);
+            border-radius: 20px; padding: 40px 35px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.02);
+            transition: transform 0.3s ease;
         }
-        .logo { text-align: center; margin-bottom: 35px; }
-        .logo h1 {
-            font-size: 3rem; font-weight: 900; color: #00f0ff; letter-spacing: 3px;
-            text-shadow: 0 0 10px #00f0ff, 0 0 30px #00f0ff;
-        }
-        .logo p { margin-top: 10px; color: #c9d4ff; font-size: 15px; font-weight: bold; }
-        .label { display: block; margin-bottom: 10px; margin-top: 18px; font-size: 15px; font-weight: 900; color: #ffffff; letter-spacing: 1px; }
+        .login-box:hover { border-color: rgba(0, 240, 255, 0.6); }
+        
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo i { font-size: 3rem; color: #00f0ff; margin-bottom: 15px; text-shadow: 0 0 15px rgba(0, 240, 255, 0.6); }
+        .logo h1 { font-size: 2.2rem; font-weight: 900; color: #ffffff; letter-spacing: 2px; }
+        .logo p { color: #8ea1d1; font-size: 13px; font-weight: 600; letter-spacing: 3px; margin-top: 5px; }
+        
+        .label { display: block; margin-bottom: 8px; margin-top: 20px; font-size: 13px; font-weight: 700; color: #a9b8e3; letter-spacing: 1px; }
         .input-box {
-            width: 100%; padding: 16px; background: #101826; color: white;
-            font-size: 16px; font-weight: bold; border: 2px solid rgba(0, 255, 255, 0.2);
-            border-radius: 12px; outline: none; transition: 0.3s;
+            width: 100%; padding: 15px 18px; background: rgba(0, 0, 0, 0.4); color: white;
+            font-size: 15px; border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 10px; outline: none; transition: all 0.3s;
         }
-        .input-box:focus { border: 2px solid #00f0ff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); }
-        .info-box { margin-top: 18px; padding: 14px; background: #0f1624; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.08); }
-        .info-box p { margin: 8px 0; color: #dbe4ff; font-size: 14px; font-weight: bold; }
-        .captcha-box { margin-top: 22px; display: flex; align-items: center; gap: 10px; }
-        .captcha-box input { width: 20px; height: 20px; }
-        .captcha-box label { font-weight: 900; color: #00f0ff; }
+        .input-box:focus { border-color: #00f0ff; background: rgba(0, 240, 255, 0.05); box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); }
+        
+        .captcha-box { margin-top: 25px; display: flex; align-items: center; gap: 12px; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; border: 1px dashed rgba(255, 255, 255, 0.1); }
+        .captcha-box input[type="checkbox"] { width: 22px; height: 22px; accent-color: #00f0ff; cursor: pointer; }
+        .captcha-box label { font-weight: 700; color: #e0e6ff; font-size: 14px; cursor: pointer; }
+        
         .login-btn {
-            width: 100%; margin-top: 28px; padding: 16px; border: none; border-radius: 14px;
-            background: linear-gradient(90deg, #00f0ff, #ff00ff); color: black;
-            font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+            width: 100%; margin-top: 30px; padding: 16px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, #00f0ff 0%, #0088ff 100%); color: #000;
+            font-size: 16px; font-weight: 900; letter-spacing: 1px; cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 240, 255, 0.3); text-transform: uppercase;
         }
-        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 0 20px #00f0ff, 0 0 40px #ff00ff; }
-        .security { margin-top: 22px; text-align: center; color: #8ea1d1; font-size: 13px; font-weight: bold; }
-        .status { margin-top: 25px; text-align: center; color: #00ff9d; font-weight: 900; font-size: 14px; }
-        @media(max-width:600px) { .logo h1 { font-size: 2.2rem; } .login-box { padding: 28px; } .main-container { padding-top: 30px; } }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5); filter: brightness(1.1); }
+        .login-btn:disabled { background: #333; color: #888; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        .status-container { margin-top: 25px; text-align: center; padding: 15px; border-radius: 10px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .status-text { font-weight: 800; font-size: 13px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        /* Status Colors */
+        .status-checking { color: #ffcc00; }
+        .status-online { color: #00ff9d; }
+        .status-offline { color: #ff4444; }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="login-box">
-            <div class="logo">
-                <h1>ANIS AI SYSTEM</h1>
-                <p>ULTRA SECURE AI TERMINAL</p>
+
+    <div id="file-warning">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 5rem; color: #ff3333; margin-bottom: 20px;"></i>
+        <h1>PROTOCOL ERROR</h1>
+        <p>You cannot run this secure system directly from your hard drive (<code>file:///</code>).</p><br>
+        <p>Browsers block logins from local files. To access Anis-AI-Shield, you must open this folder in <strong>VS Code</strong> and click <strong>"Go Live"</strong> in the bottom right corner.</p>
+    </div>
+
+    <div class="login-box" id="main-interface">
+        <div class="logo">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h1>Anis-AI-Shield</h1>
+            <p>ADVANCED NEURAL TERMINAL</p>
+        </div>
+
+        <form id="loginForm">
+            <label class="label"><i class="fa-solid fa-server"></i> RENDER URL (USERNAME)</label>
+            <input type="text" id="renderUrl" class="input-box" placeholder="https://your-render-url.onrender.com" required autocomplete="off">
+            
+            <label class="label"><i class="fa-solid fa-key"></i> SECURE PASSWORD</label>
+            <input type="password" id="password" class="input-box" placeholder="Enter System Passphrase" required>
+
+            <div class="captcha-box">
+                <input type="checkbox" id="humanCheck" required>
+                <label for="humanCheck">I AM HUMAN — INITIATE HANDSHAKE</label>
             </div>
-            <form id="loginForm">
-                <label class="label">LOGIN USERNAME / IDENTIFIER</label>
-                <input type="text" id="renderUrl" class="input-box" placeholder="Enter Username" required>
-                
-                <label class="label">SECURE PASSWORD</label>
-                <input type="password" id="password" class="input-box" placeholder="Enter Secure Password" required>
 
-                <div class="info-box">
-                    <p><i class="fa-solid fa-shield-halved"></i> Only authorized Render users can access this AI.</p>
-                    <p><i class="fa-solid fa-lock"></i> Protected with AI Human Verification.</p>
-                    <p><i class="fa-solid fa-terminal"></i> Direct access to ANIS AI Dashboard after login.</p>
-                </div>
+            <button type="submit" class="login-btn" id="launchBtn"><i class="fa-solid fa-bolt"></i> Establish Connection</button>
+        </form>
 
-                <div class="captcha-box">
-                    <input type="checkbox" id="humanCheck" required>
-                    <label for="humanCheck">I AM HUMAN — VERIFY IDENTITY</label>
-                </div>
-
-                <button type="submit" class="login-btn"><i class="fa-solid fa-right-to-bracket"></i> LAUNCH ANIS AI</button>
-            </form>
-            <div class="security">MILITARY GRADE AI SECURITY ENABLED</div>
-            <div class="status">● AI CORE STATUS : ONLINE</div>
+        <div class="status-container">
+            <div id="healthIndicator" class="status-text status-checking">
+                <i class="fas fa-spinner fa-spin"></i> PINGING RENDER SERVER...
+            </div>
         </div>
     </div>
 
     <script>
         const API_BASE_URL = "https://protected-ethical-anis-ai-12.onrender.com";
-        const form = document.getElementById("loginForm");
 
-        form.addEventListener("submit", async function(e) {
+        // 1. HARD DRIVE PROTOCOL CHECK
+        if (window.location.protocol === 'file:') {
+            document.getElementById('main-interface').style.display = 'none';
+            document.getElementById('file-warning').style.display = 'flex';
+        }
+
+        // 2. LIVE HEALTH CHECKER
+        async function checkServerHealth() {
+            const indicator = document.getElementById('healthIndicator');
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    indicator.className = "status-text status-online";
+                    indicator.innerHTML = '<i class="fa-solid fa-circle-check"></i> RENDER BACKEND : ONLINE';
+                } else {
+                    throw new Error("Bad response");
+                }
+            } catch (error) {
+                indicator.className = "status-text status-offline";
+                indicator.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> SERVER ASLEEP - RETRYING...';
+                // Try again in 5 seconds if asleep
+                setTimeout(checkServerHealth, 5000);
+            }
+        }
+        
+        // Run health check if not on file protocol
+        if (window.location.protocol !== 'file:') {
+            checkServerHealth();
+        }
+
+        // 3. LOGIN LOGIC
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
             e.preventDefault();
+            
             const renderUrl = document.getElementById("renderUrl").value.trim();
             const password = document.getElementById("password").value;
             const humanCheck = document.getElementById("humanCheck").checked;
-            const btn = document.querySelector(".login-btn");
+            const btn = document.getElementById("launchBtn");
 
-            if (!humanCheck) { alert("[ACCESS DENIED]: Please confirm you are human."); return; }
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> RUNNING DECRYPTION CHECK...`;
+            if (!humanCheck) return;
+            
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> DECRYPTING...`;
             btn.disabled = true;
 
             const urlEncodedData = new URLSearchParams();
@@ -120,8 +175,9 @@
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: urlEncodedData
                 });
+                
                 const data = await response.json();
-                if (!response.ok) { throw new Error(data.detail || "Authentication mapping failure."); }
+                if (!response.ok) throw new Error(data.detail || "Authentication mapping failure.");
 
                 if (data.requires_biometrics) {
                     const bioResponse = await fetch(`${API_BASE_URL}/api/login/biometric-verify`, {
@@ -130,16 +186,18 @@
                         body: JSON.stringify({ signature: data.biometric_challenge, userEmail: data.user_identity })
                     });
                     const bioResult = await bioResponse.json();
-                    if (!bioResponse.ok) { throw new Error(bioResult.detail || "Biometric validation failed."); }
+                    if (!bioResponse.ok) throw new Error(bioResult.detail || "Validation failed.");
 
                     sessionStorage.setItem("anis_token", bioResult.access_token);
                     localStorage.setItem("anis_ai_logged", "true");
-                    btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> DECRYPTION SUCCESSFUL`;
-                    setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
+                    
+                    btn.style.background = "linear-gradient(135deg, #00ff9d 0%, #00b36e 100%)";
+                    btn.innerHTML = `<i class="fa-solid fa-unlock"></i> ACCESS GRANTED`;
+                    setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
                 }
             } catch (error) {
-                alert(`[CONNECTION ERROR]: ${error.message}\n\nTip: Open ${API_BASE_URL}/health in a new tab to wake up the server!`);
-                btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> LAUNCH ANIS AI`;
+                alert(`[SYSTEM ERROR]: ${error.message}\nMake sure the server is fully awake before logging in.`);
+                btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Establish Connection`;
                 btn.disabled = false;
             }
         });
