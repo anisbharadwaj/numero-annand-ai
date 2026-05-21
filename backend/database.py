@@ -1,4 +1,5 @@
 import os
+import json
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.sql import func
@@ -34,7 +35,7 @@ class ChatMessage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(255), index=True, nullable=False)
-    role = Column(String(32), nullable=False)  # user | assistant
+    role = Column(String(32), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
