@@ -20,7 +20,6 @@ const launchBtn = document.getElementById("launchBtn");
 const checkBtn = document.getElementById("checkBtn");
 const closeAi = document.getElementById("closeAi");
 
-let currentToken = sessionStorage.getItem("anis_jwt") || "";
 let healthRetryCount = 0;
 
 function showDashboard() {
@@ -77,6 +76,7 @@ async function pollHealth() {
 
     serverStatus.innerText = "ONLINE";
     aiStatus.innerText = data.ai_connected ? "READY" : "API KEY MISSING";
+
     monitorBox.innerHTML = `
       <strong>Status:</strong> ${data.status}<br>
       <strong>Version:</strong> ${data.version}<br>
@@ -125,7 +125,6 @@ function getToken() {
 }
 
 function setToken(token) {
-  currentToken = token;
   sessionStorage.setItem("anis_jwt", token);
 }
 
@@ -178,7 +177,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     }, 900);
   } catch (err) {
     console.error("Login error:", err);
-    showNotice(err.message || "Failed to reach server.", true);
+    showNotice(err.message || "Failed to fetch.", true);
   } finally {
     loginBtn.disabled = false;
     loginBtn.innerHTML = `<i class="fa-solid fa-power-off"></i> INITIATE CONNECTION`;
@@ -238,7 +237,6 @@ widgetInput.addEventListener("keypress", (e) => {
 
 logoutBtn.addEventListener("click", () => {
   sessionStorage.removeItem("anis_jwt");
-  currentToken = "";
   showLogin();
   location.reload();
 });
