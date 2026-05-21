@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+anis_shield.db
+*.sqlite
+*.db
+.DS_Store
+logs/
