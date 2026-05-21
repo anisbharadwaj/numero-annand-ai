@@ -1,40 +1,32 @@
 import os
-from jose import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from jose import jwt, JWTError
+from passlib.context import CryptContext
 
-JWT_SECRET = os.getenv(
-    "JWT_SECRET",
-    "anis_ai_ultra_secure_zero_trust_key_2026_matrix_xyz"
-)
-
+SECRET_KEY = os.getenv("SECRET_KEY", "anis_ai_secret_key_2026")
 ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
 
-ACCESS_TOKEN_EXPIRE_HOURS = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_HOURS", "12")
-)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def create_access_token(data: dict):
-    to_encode = data.copy()
 
-    expire = datetime.utcnow() + timedelta(
-        hours=ACCESS_TOKEN_EXPIRE_HOURS
-    )
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
 
-    to_encode.update({"exp": expire})
 
-    return jwt.encode(
-        to_encode,
-        JWT_SECRET,
-        algorithm=ALGORITHM
-    )
+def verify_password(plain_password: str, password_hash: str) -> bool:
+    return pwd_context.verify(plain_password, password_hash)
+
+
+def create_access_token(data: dict) -> str:
+    payload = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    payload.update({"exp": expire, "iat": datetime.now(timezone.utc)})
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
 
 def decode_token(token: str):
     try:
-        payload = jwt.decode(
-            token,
-            JWT_SECRET,
-            algorithms=[ALGORITHM]
-        )
-        return payload
-    except:
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
         return None
