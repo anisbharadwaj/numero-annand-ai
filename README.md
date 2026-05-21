@@ -1,61 +1,42 @@
-# Protected Ethical Anis AI
+# Anis-AI-Shield
 
-Protected Ethical Anis AI is a secure and ethical AI framework focused on:
+Secure futuristic AI cybersecurity dashboard with:
+- Render URL + password login
+- Human verification
+- Health check
+- Launch button
+- Floating AI widget
+- Gemini AI responses
+- JWT auth
+- bcrypt password hashing
 
-- AI validation
-- Ethical enforcement
-- Monitoring
-- Reliability metrics
-- Secure ingestion pipelines
-- Audit workflows
+## Folder Structure
+- backend/
+- frontend/
 
-## Features
+## Backend Setup
+Set these environment variables in Render:
+- SECRET_KEY
+- GEMINI_API_KEY
+- INITIAL_USERS
+- VERCEL_URL
+- DATABASE_URL
+- ACCESS_TOKEN_EXPIRE_HOURS
 
-- Ethical AI enforcement engine
-- Monitoring and reliability tracking
-- Schema validation
-- CI/CD integration
-- Automated testing
-- Policy-based protection
+## Login Format
+Username: your Render URL  
+Password: your unique password
 
-## Tech Stack
+## Render Start Command
+uvicorn app:app --host 0.0.0.0 --port $PORT
 
-- Python
-- FastAPI
-- Pytest
-- GitHub Actions
+## Health Check
+/health
 
-## Installation
+## Frontend
+Deploy the `frontend/` folder on Vercel.
 
-```bash
-git clone https://github.com/anisbharadwaj/Protected-Ethical-Anis-AI.git
-
-cd Protected-Ethical-Anis-AI
-
-pip install -r backend/requirements.txt
-```
-
-## Run Server
-
-```bash
-uvicorn backend.app:app --reload
-```
-
-## Run Tests
-
-```bash
-pytest
-```
-
-## Project Structure
-
-```txt
-backend/
-tests/
-.github/workflows/
-infra/
-```
-
-## License
-
-MIT License
+## Notes
+- AI replies come from Gemini
+- JWT is stored in sessionStorage
+- Login is protected by human verification
