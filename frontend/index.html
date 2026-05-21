@@ -1,84 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anis-AI-Shield</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anis-AI-Shield</title>
+
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <div id="login-view" class="container">
-        <div class="cyber-panel">
-            <div class="logo">
-                <i class="fa-solid fa-shield-virus glow-cyan"></i>
-                <h1>ANIS-AI-SHIELD</h1>
-                <p>SECURE MULTI-NODE TERMINAL</p>
-            </div>
 
-            <form id="loginForm">
-                <div class="input-group">
-                    <label>RENDER URL (USERNAME) <span class="helper">[ex: https://user1.onrender.com]</span></label>
-                    <input type="text" id="username" placeholder="Enter Deployment URL" required>
-                </div>
-                
-                <div class="input-group">
-                    <label>SECURE PASSWORD <span class="helper">[Unique access key]</span></label>
-                    <input type="password" id="password" placeholder="••••••••" required>
-                </div>
-
-                <div class="verify-box">
-                    <input type="checkbox" id="humanCheck" required>
-                    <label for="humanCheck">I AM HUMAN — VERIFY IDENTITY</label>
-                </div>
-
-                <button type="submit" id="loginBtn" class="cyber-btn">
-                    <i class="fa-solid fa-terminal"></i> INITIATE CONNECTION
-                </button>
-            </form>
-
-            <div id="health-monitor" class="status-box warning">
-                <i class="fas fa-spinner fa-spin"></i> WAKING SERVER...
-            </div>
-        </div>
+<div id="login-screen" class="screen">
+  <div class="glass-panel auth-panel">
+    <div class="logo-block">
+      <i class="fa-solid fa-shield-halved glow-icon"></i>
+      <h1 class="neon-text">ANIS-AI-SHIELD</h1>
+      <p class="subtitle">SECURE TERMINAL NODE</p>
     </div>
 
-    <div id="dashboard-view" class="container hidden">
-        <div class="dashboard-header">
-            <h2><i class="fa-solid fa-server"></i> SYSTEM OVERVIEW</h2>
-            <button id="logoutBtn" class="danger-btn">DISCONNECT</button>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>NODE IDENTITY</h3>
-                <p id="dash-user" class="text-blue">---</p>
-            </div>
-            <div class="stat-card">
-                <h3>UPTIME</h3>
-                <p id="dash-uptime" class="text-green">---</p>
-            </div>
-            <div class="stat-card">
-                <h3>AI CORE</h3>
-                <p id="dash-ai" class="text-cyan">STANDBY</p>
-            </div>
-        </div>
+    <form id="loginForm" class="login-form">
+      <label class="cyber-label">RENDER URL (USERNAME)</label>
+      <p class="helper-text">[Enter your Render deployment URL]</p>
+      <input type="text" id="username" class="cyber-input" placeholder="https://protected-ethical-anis-ai-12.onrender.com" required>
+
+      <label class="cyber-label">SECURE PASSWORD</label>
+      <p class="helper-text">[Enter your unique Render password]</p>
+      <input type="password" id="password" class="cyber-input" placeholder="••••••••" required>
+
+      <div class="human-verify">
+        <input type="checkbox" id="humanCheck" required>
+        <label for="humanCheck">I AM HUMAN — VERIFY IDENTITY</label>
+      </div>
+
+      <button type="submit" id="loginBtn" class="cyber-btn">
+        <i class="fa-solid fa-power-off"></i> INITIATE CONNECTION
+      </button>
+    </form>
+
+    <div id="health-monitor" class="status-box warning">
+      <i class="fas fa-spinner fa-spin"></i> PINGING RENDER SERVER...
+    </div>
+  </div>
+</div>
+
+<div id="dashboard-screen" class="screen hidden">
+  <header class="dash-header">
+    <div>
+      <h2><i class="fa-solid fa-network-wired"></i> SYSTEM DASHBOARD</h2>
+      <p class="dash-subtitle">Anis-AI-Shield is online</p>
+    </div>
+    <div class="header-actions">
+      <button id="launchBtn" class="cyber-btn-small">LAUNCH</button>
+      <button id="checkBtn" class="cyber-btn-small">CHECK</button>
+      <button id="logoutBtn" class="cyber-btn-small danger">DISCONNECT</button>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>SERVER STATUS</h3>
+      <p class="text-cyan" id="serverStatus">WAKING...</p>
+    </div>
+    <div class="stat-card">
+      <h3>AI CORE</h3>
+      <p class="text-cyan" id="aiStatus">STANDBY</p>
+    </div>
+    <div class="stat-card">
+      <h3>SECURITY</h3>
+      <p class="text-green">ENCRYPTED</p>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="panel">
+      <h3>HEALTH MONITOR</h3>
+      <div class="monitor" id="monitorBox">Waiting...</div>
     </div>
 
-    <button id="openAiBtn" class="hidden"><i class="fa-solid fa-brain"></i></button>
-    <div id="ai-widget" class="hidden">
-        <div class="ai-header">
-            <span><i class="fa-solid fa-robot"></i> Anis AI</span>
-            <button id="closeAi"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="ai-chat" id="chatBox"></div>
-        <div class="ai-input">
-            <input type="text" id="aiInput" placeholder="Command AI...">
-            <button id="sendAi"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
-    </div>
+    <div class="panel">
+      <h3>AI CHAT</h3>
+      <div class="chat-box" id="chatBox"></div>
 
-    <script src="script.js"></script>
+      <div class="chat-input-row">
+        <input type="text" id="aiInput" class="cyber-input" placeholder="Ask AI...">
+        <button id="sendAi" class="cyber-btn">SEND</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ai-widget" class="hidden">
+  <div class="ai-header">
+    <span><i class="fa-solid fa-robot"></i> Anis AI</span>
+    <button id="closeAi"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="ai-chat-box" id="widgetChatBox"></div>
+  <div class="ai-input-area">
+    <input type="text" id="widgetInput" placeholder="Command Anis AI...">
+    <button id="sendWidgetAi"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<button id="openAiBtn" class="hidden floating-btn">
+  <i class="fa-solid fa-comment-dots"></i>
+</button>
+
+<script src="script.js"></script>
 </body>
 </html>
