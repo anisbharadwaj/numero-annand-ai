@@ -1,7 +1,7 @@
 const API_BASE_URL = "https://protected-ethical-anis-ai-12.onrender.com";
 
 const loginScreen = document.getElementById("login-screen");
-const dashboardScreen = document.getElementById("dashboard-screen");
+const dashboardScreen = document.getElementById("dashboard-view");
 const healthMonitor = document.getElementById("health-monitor");
 const loginBtn = document.getElementById("loginBtn");
 const openAiBtn = document.getElementById("openAiBtn");
@@ -26,18 +26,6 @@ let lastHealthInterval = null;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function setToken(token) {
-  sessionStorage.setItem("anis_jwt", token);
-}
-
-function getToken() {
-  return sessionStorage.getItem("anis_jwt") || "";
-}
-
-function removeToken() {
-  sessionStorage.removeItem("anis_jwt");
 }
 
 function showDashboard() {
@@ -158,6 +146,10 @@ class ConnectionManager {
 const connectionManager = new ConnectionManager(API_BASE_URL);
 
 async function pollHealth() {
+  if (healthRetryCount === 0) {
+    showNotice(`<i class="fas fa-spinner fa-spin"></i> CONNECTING TO ANIS AI CORE...`, true);
+  }
+
   try {
     const start = Date.now();
 
@@ -269,8 +261,6 @@ async function streamChat(container, inputEl) {
   const typingId = addTypingMessage(container);
   const target = document.getElementById(typingId);
 
-  const token = getToken();
-
   try {
     await connectionManager.connect((statusText) => {
       showNotice(statusText, true);
@@ -282,7 +272,6 @@ async function streamChat(container, inputEl) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify({ message }),
       },
@@ -408,10 +397,6 @@ if (document.getElementById("loginForm")) {
         throw new Error(data.detail || "Authentication Failed.");
       }
 
-      if (data.access_token) {
-        setToken(data.access_token);
-      }
-
       showNotice("Access Key Authorized. Unlocking Terminal.", false);
 
       setTimeout(() => {
@@ -443,7 +428,6 @@ if (logoutBtn) {
       // ignore logout errors
     }
 
-    removeToken();
     location.reload();
   });
 }
@@ -505,7 +489,7 @@ if (widgetInput) {
 }
 
 window.addEventListener("load", async () => {
-  const token = getToken();
+  const token = sessionStorage.getItem("anis_jwt");
 
   if (token) {
     showDashboard();
@@ -513,10 +497,7 @@ window.addEventListener("load", async () => {
     showLogin();
   }
 
-  showNotice(
-    `<i class="fas fa-spinner fa-spin"></i> CONNECTING TO ANIS AI CORE...`,
-    true
-  );
+  showNotice(`<i class="fas fa-spinner fa-spin"></i> CONNECTING TO ANIS AI CORE...`, true);
 
   connectionManager.connect((statusText) => {
     showNotice(statusText, true);
