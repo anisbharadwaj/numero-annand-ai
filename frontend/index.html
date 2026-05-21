@@ -4,184 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anis-AI-Shield</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #030508; color: white;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; overflow-x: hidden;
-        }
-        body::before {
-            content: ""; position: fixed; width: 100%; height: 100%;
-            background: radial-gradient(circle at top left, rgba(0, 240, 255, 0.1), transparent 40%),
-                        radial-gradient(circle at bottom right, rgba(255, 0, 255, 0.1), transparent 40%);
-            z-index: -1;
-        }
-        
-        /* Local File Warning Overlay */
-        #file-warning {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 10, 0.98); z-index: 9999;
-            flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px;
-        }
-        #file-warning h1 { color: #ff3333; font-size: 2.5rem; margin-bottom: 15px; }
-        #file-warning p { color: #dbe4ff; font-size: 1.1rem; max-width: 500px; line-height: 1.5; margin-bottom: 15px;}
-        #file-warning code { background: #1a1a1a; padding: 6px 12px; color: #00f0ff; border-radius: 6px; font-weight: bold; }
-
-        .login-box {
-            width: 100%; max-width: 450px; background: rgba(10, 15, 25, 0.8);
-            border: 1px solid rgba(0, 240, 255, 0.25); backdrop-filter: blur(20px);
-            border-radius: 16px; padding: 35px 30px; margin: 20px;
-            box-shadow: 0 0 40px rgba(0, 240, 255, 0.1);
-        }
-        
-        .logo { text-align: center; margin-bottom: 25px; }
-        .logo i { font-size: 2.8rem; color: #00f0ff; margin-bottom: 12px; text-shadow: 0 0 15px rgba(0, 240, 255, 0.5); }
-        .logo h1 { font-size: 2rem; font-weight: 900; letter-spacing: 1px; }
-        .logo p { color: #8ea1d1; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-top: 5px; }
-        
-        .label { display: block; margin: 18px 0 8px; font-size: 13px; font-weight: 700; color: #a9b8e3; }
-        .input-box {
-            width: 100%; padding: 14px 16px; background: rgba(0, 0, 0, 0.5); color: white;
-            font-size: 15px; border: 1px solid rgba(0, 240, 255, 0.2);
-            border-radius: 10px; outline: none; transition: 0.3s;
-        }
-        .input-box:focus { border-color: #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); }
-        
-        .captcha-box { margin-top: 22px; display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.4); padding: 14px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .captcha-box input[type="checkbox"] { width: 20px; height: 20px; accent-color: #00f0ff; }
-        .captcha-box label { font-weight: 700; color: #e0e6ff; font-size: 13px; }
-        
-        .login-btn {
-            width: 100%; margin-top: 25px; padding: 15px; border: none; border-radius: 10px;
-            background: linear-gradient(90deg, #00f0ff, #0088ff); color: #000;
-            font-size: 15px; font-weight: 900; letter-spacing: 1px; cursor: pointer; transition: 0.3s;
-        }
-        .login-btn:hover { box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); transform: translateY(-2px); }
-        .login-btn:disabled { background: #333; color: #888; cursor: not-allowed; transform: none; box-shadow: none; }
-        
-        .status-container { margin-top: 20px; text-align: center; padding: 12px; background: rgba(0, 0, 0, 0.6); border-radius: 8px; }
-        .status-text { font-weight: 800; font-size: 12px; letter-spacing: 1px; }
-        .status-checking { color: #ffcc00; }
-        .status-online { color: #00ff9d; }
-        .status-offline { color: #ff4444; }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-
-    <div id="file-warning">
-        <i class="fa-solid fa-ban" style="font-size: 4rem; color: #ff3333; margin-bottom: 20px;"></i>
-        <h1>SECURITY BLOCK</h1>
-        <p>You opened this file directly from your C: Drive.</p>
-        <p>Web browsers block secure logins from local files. You must run this using VS Code Live Server or Vercel.</p>
-        <br>
-        <code>Click "Go Live" in VS Code to fix this.</code>
-    </div>
-
-    <div class="login-box" id="main-interface">
-        <div class="logo">
-            <i class="fa-solid fa-microchip"></i>
-            <h1>Anis-AI-Shield</h1>
-            <p>SECURE TERMINAL NODE</p>
-        </div>
-
-        <form id="loginForm">
-            <label class="label"><i class="fa-solid fa-link"></i> RENDER URL (USERNAME)</label>
-            <input type="text" id="renderUrl" class="input-box" placeholder="Enter ID" required>
-            
-            <label class="label"><i class="fa-solid fa-lock"></i> SECURE PASSWORD</label>
-            <input type="password" id="password" class="input-box" placeholder="Enter Password" required>
-
-            <div class="captcha-box">
-                <input type="checkbox" id="humanCheck" required>
-                <label for="humanCheck">I AM HUMAN — VERIFY</label>
+    <div id="login-view" class="container">
+        <div class="cyber-panel">
+            <div class="logo">
+                <i class="fa-solid fa-shield-virus glow-cyan"></i>
+                <h1>ANIS-AI-SHIELD</h1>
+                <p>SECURE MULTI-NODE TERMINAL</p>
             </div>
 
-            <button type="submit" class="login-btn" id="launchBtn"><i class="fa-solid fa-power-off"></i> INITIATE CONNECTION</button>
-        </form>
-
-        <div class="status-container">
-            <div id="healthIndicator" class="status-text status-checking">
-                <i class="fas fa-spinner fa-spin"></i> PINGING RENDER BACKEND...
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const API_BASE_URL = "https://protected-ethical-anis-ai-12.onrender.com";
-
-        // 1. Prevent running from C: Drive to stop "Failed to fetch" errors
-        if (window.location.protocol === 'file:') {
-            document.getElementById('main-interface').style.display = 'none';
-            document.getElementById('file-warning').style.display = 'flex';
-        }
-
-        // 2. Render Auto-Health Check
-        async function checkHealth() {
-            const indicator = document.getElementById('healthIndicator');
-            try {
-                const res = await fetch(`${API_BASE_URL}/health`);
-                if (res.ok) {
-                    indicator.className = "status-text status-online";
-                    indicator.innerHTML = '<i class="fa-solid fa-circle-check"></i> RENDER BACKEND : ONLINE';
-                } else throw new Error("Offline");
-            } catch (e) {
-                indicator.className = "status-text status-offline";
-                indicator.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> SERVER WAKING UP...';
-                setTimeout(checkHealth, 5000); // Check again in 5 seconds
-            }
-        }
-        if (window.location.protocol !== 'file:') checkHealth();
-
-        // 3. Login Bypass Logic
-        document.getElementById("loginForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById("launchBtn");
-            if (!document.getElementById("humanCheck").checked) return;
-            
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> DECRYPTING...`;
-            btn.disabled = true;
-
-            const urlEncoded = new URLSearchParams();
-            urlEncoded.append("username", document.getElementById("renderUrl").value.trim());
-            urlEncoded.append("password", document.getElementById("password").value);
-            urlEncoded.append("captcha_verified", "true");
-
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/login`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: urlEncoded
-                });
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>RENDER URL (USERNAME) <span class="helper">[ex: https://user1.onrender.com]</span></label>
+                    <input type="text" id="username" placeholder="Enter Deployment URL" required>
+                </div>
                 
-                if (!res.ok) throw new Error("Auth failed.");
-                const data = await res.json();
+                <div class="input-group">
+                    <label>SECURE PASSWORD <span class="helper">[Unique access key]</span></label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
 
-                if (data.requires_biometrics) {
-                    const bioRes = await fetch(`${API_BASE_URL}/api/login/biometric-verify`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ signature: data.biometric_challenge, userEmail: data.user_identity })
-                    });
-                    
-                    if (!bioRes.ok) throw new Error("Token failed.");
-                    const bioData = await bioRes.json();
+                <div class="verify-box">
+                    <input type="checkbox" id="humanCheck" required>
+                    <label for="humanCheck">I AM HUMAN — VERIFY IDENTITY</label>
+                </div>
 
-                    sessionStorage.setItem("anis_token", bioData.access_token);
-                    localStorage.setItem("anis_ai_logged", "true");
-                    
-                    btn.style.background = "#00ff9d";
-                    btn.innerHTML = `<i class="fa-solid fa-unlock"></i> ACCESS GRANTED`;
-                    setTimeout(() => { window.location.href = "dashboard.html"; }, 800);
-                }
-            } catch (error) {
-                alert(`[ERROR]: Failed to reach server. Make sure Render is awake.`);
-                btn.innerHTML = `<i class="fa-solid fa-power-off"></i> INITIATE CONNECTION`;
-                btn.disabled = false;
-            }
-        });
-    </script>
+                <button type="submit" id="loginBtn" class="cyber-btn">
+                    <i class="fa-solid fa-terminal"></i> INITIATE CONNECTION
+                </button>
+            </form>
+
+            <div id="health-monitor" class="status-box warning">
+                <i class="fas fa-spinner fa-spin"></i> WAKING SERVER...
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-view" class="container hidden">
+        <div class="dashboard-header">
+            <h2><i class="fa-solid fa-server"></i> SYSTEM OVERVIEW</h2>
+            <button id="logoutBtn" class="danger-btn">DISCONNECT</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>NODE IDENTITY</h3>
+                <p id="dash-user" class="text-blue">---</p>
+            </div>
+            <div class="stat-card">
+                <h3>UPTIME</h3>
+                <p id="dash-uptime" class="text-green">---</p>
+            </div>
+            <div class="stat-card">
+                <h3>AI CORE</h3>
+                <p id="dash-ai" class="text-cyan">STANDBY</p>
+            </div>
+        </div>
+    </div>
+
+    <button id="openAiBtn" class="hidden"><i class="fa-solid fa-brain"></i></button>
+    <div id="ai-widget" class="hidden">
+        <div class="ai-header">
+            <span><i class="fa-solid fa-robot"></i> Anis AI</span>
+            <button id="closeAi"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="ai-chat" id="chatBox"></div>
+        <div class="ai-input">
+            <input type="text" id="aiInput" placeholder="Command AI...">
+            <button id="sendAi"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
