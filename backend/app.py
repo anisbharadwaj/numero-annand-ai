@@ -1,209 +1,134 @@
 import os
 import time
-import json
 import logging
-from typing import Optional
-
-import google.generativeai as genai
-from fastapi import FastAPI, HTTPException, Form, Header
+from fastapi import FastAPI, Depends, HTTPException, Form, Header
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
+import google.generativeai as genai
 
-from database import SessionLocal, User, init_db
-from auth import hash_password, verify_password, create_access_token, decode_token
+from backend.database import engine, get_db, init_db, User, pwd_context
+from backend.auth import create_access_token, decode_token
 
-os.makedirs("logs", exist_ok=True)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("logs/app.log"),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger("anis-ai-shield")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("Anis-AI-API")
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-VERCEL_URL = os.getenv("VERCEL_URL", "https://anis-ai-shield.vercel.app")
-SERVER_START_TIME = time.time()
-INITIAL_USERS = os.getenv("INITIAL_USERS", "[]")
+SERVER_START = time.time()
+app = FastAPI(title="Anis-AI-Shield")
 
-ai_model = None
-if GEMINI_API_KEY:
-    try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        ai_model = genai.GenerativeModel("gemini-1.5-flash")
-        logger.info("Gemini AI initialized successfully.")
-    except Exception as e:
-        logger.error(f"Gemini init failed: {e}")
-        ai_model = None
-else:
-    logger.warning("GEMINI_API_KEY not set. AI will not work until configured.")
-
-app = FastAPI(title="Anis-AI-Shield", version="2.0.0")
-
+# Enable CORS for Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        VERCEL_URL,
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5500",
-        "http://127.0.0.1:5500"
-    ],
-    allow_origin_regex=r"https://.*\.vercel\.app",
-    allow_credentials=False,
+    allow_origins=["*"], # Accepts all origins to prevent Fetch Errors
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 init_db()
 
+# Setup AI
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_KEY:
+    genai.configure(api_key=GEMINI_KEY)
+    sys_prompt = """You are Anis AI, the core intelligence of the Anis-AI-Shield platform.
+    Your duties: Assist the user with cybersecurity, analyze inputs, and explain the platform.
+    The platform uses a Render URL + Password login, followed by biometric Passkey 2FA.
+    Access to you requires an active Monthly (₹200) or Yearly (₹1200) membership paid via QR code.
+    Keep answers concise, highly intelligent, use markdown, and be helpful."""
+    ai_model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=sys_prompt)
 
-def seed_initial_users():
-    try:
-        items = json.loads(INITIAL_USERS)
-        if not isinstance(items, list):
-            logger.warning("INITIAL_USERS is not a list.")
-            return
-
-        db = SessionLocal()
-        try:
-            for item in items:
-                username = str(item.get("url", "")).strip()
-                plain_password = str(item.get("pass", "")).strip()
-
-                if not username or not plain_password:
-                    continue
-
-                existing = db.query(User).filter(User.username == username).first()
-                if existing:
-                    continue
-
-                db.add(User(
-                    username=username,
-                    password_hash=hash_password(plain_password)
-                ))
-                logger.info(f"Seeded user: {username}")
-
-            db.commit()
-        finally:
-            db.close()
-
-    except Exception as e:
-        logger.error(f"Failed to seed initial users: {e}")
-
-
-seed_initial_users()
-
-
-class ChatMessage(BaseModel):
+# Pydantic Models
+class ChatPayload(BaseModel):
     message: str
+    history: list = []
 
+class BiometricPayload(BaseModel):
+    credential_id: str
 
-conversation_memory = {}
-
-
-@app.on_event("startup")
-def startup_event():
-    logger.info("Anis-AI-Shield backend started.")
-    logger.info(f"VERCEL_URL: {VERCEL_URL}")
-
-
-@app.get("/")
-def root():
-    return {
-        "status": "ok",
-        "app": "Anis-AI-Shield",
-    }
-
-
+# Endpoints
 @app.get("/health")
 def health():
     return {
-        "status": "ok",
-        "uptime": round(time.time() - SERVER_START_TIME, 2),
-        "version": "2.0.0",
-        "ai_connected": bool(GEMINI_API_KEY and ai_model),
+        "status": "ok", 
+        "uptime": int(time.time() - SERVER_START),
+        "version": "4.0.0-Production",
+        "ai_connected": bool(GEMINI_KEY)
     }
 
-
 @app.post("/api/login")
-def login(
-    username: str = Form(...),
-    password: str = Form(...),
-    captcha_verified: str = Form(...),
-):
-    if str(captcha_verified).lower() != "true":
-        raise HTTPException(status_code=403, detail="Human verification required.")
+def login(username: str = Form(...), password: str = Form(...), human_check: bool = Form(...), db: Session = Depends(get_db)):
+    if not human_check:
+        raise HTTPException(status_code=400, detail="Human verification required")
+    
+    user = db.query(User).filter(User.render_url == username).first()
+    if not user or not pwd_context.verify(password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid Credentials")
+    
+    token = create_access_token(data={"sub": user.render_url, "step": "password_cleared"})
+    return {
+        "access_token": token, 
+        "biometric_enabled": user.biometric_enabled,
+        "membership_tier": user.membership_tier,
+        "membership_active": user.membership_active
+    }
 
-    db = SessionLocal()
-    try:
-        user = db.query(User).filter(User.username == username).first()
+@app.post("/api/biometrics/register")
+def register_biometric(payload: BiometricPayload, authorization: str = Header(None), db: Session = Depends(get_db)):
+    user_data = decode_token(authorization.split(" ")[1]) if authorization else None
+    if not user_data: raise HTTPException(status_code=401)
+    
+    user = db.query(User).filter(User.render_url == user_data["sub"]).first()
+    user.biometric_enabled = True
+    user.webauthn_credential_id = payload.credential_id
+    db.commit()
+    
+    full_token = create_access_token(data={"sub": user.render_url, "step": "fully_authenticated"})
+    return {"access_token": full_token, "status": "Biometrics Secured"}
 
-        if not user:
-            logger.warning(f"Failed login attempt: unknown username={username}")
-            raise HTTPException(status_code=401, detail="Invalid Render URL or password.")
+@app.post("/api/biometrics/verify")
+def verify_biometric(payload: BiometricPayload, authorization: str = Header(None), db: Session = Depends(get_db)):
+    user_data = decode_token(authorization.split(" ")[1]) if authorization else None
+    if not user_data: raise HTTPException(status_code=401)
+    
+    user = db.query(User).filter(User.render_url == user_data["sub"]).first()
+    if user.webauthn_credential_id != payload.credential_id:
+        raise HTTPException(status_code=403, detail="Biometric Mismatch. Intruder detected.")
+        
+    full_token = create_access_token(data={"sub": user.render_url, "step": "fully_authenticated"})
+    return {"access_token": full_token}
 
-        if not verify_password(password, user.password_hash):
-            logger.warning(f"Failed login attempt: username={username}")
-            raise HTTPException(status_code=401, detail="Invalid Render URL or password.")
-
-        token = create_access_token(
-            {
-                "sub": username,
-                "role": "admin",
-                "username": username,
-            }
-        )
-
-        logger.info(f"Login success: username={username}")
-        return {
-            "access_token": token,
-            "token_type": "bearer",
-        }
-
-    finally:
-        db.close()
-
+@app.post("/api/membership/upgrade")
+def upgrade_membership(plan: str = Form(...), authorization: str = Header(None), db: Session = Depends(get_db)):
+    user_data = decode_token(authorization.split(" ")[1]) if authorization else None
+    if not user_data: raise HTTPException(status_code=401)
+    
+    user = db.query(User).filter(User.render_url == user_data["sub"]).first()
+    user.membership_tier = plan
+    user.membership_active = True 
+    db.commit()
+    return {"status": "Membership Upgraded"}
 
 @app.post("/api/chat")
-def chat(payload: ChatMessage, authorization: Optional[str] = Header(None)):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid token.")
+def chat(payload: ChatPayload, authorization: str = Header(None), db: Session = Depends(get_db)):
+    if not authorization: raise HTTPException(status_code=401, detail="No Auth Token")
+    token_data = decode_token(authorization.split(" ")[1])
+    
+    if not token_data or token_data.get("step") != "fully_authenticated":
+        raise HTTPException(status_code=403, detail="Biometric Verification Required for AI Access")
+    
+    user = db.query(User).filter(User.render_url == token_data["sub"]).first()
+    if not user.membership_active:
+        raise HTTPException(status_code=402, detail="Active Membership Required. Please scan QR to upgrade.")
 
-    token = authorization.split(" ", 1)[1]
-    user = decode_token(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Session expired or invalid token.")
-
-    if not ai_model:
-        raise HTTPException(status_code=503, detail="AI core not configured.")
-
-    username = user.get("username", "unknown")
-    history = conversation_memory.get(username, [])
-    history = history[-10:]
+    if not GEMINI_KEY:
+        raise HTTPException(status_code=500, detail="AI Core Offline. Awaiting API Key.")
 
     try:
-        prompt = (
-            "You are Anis AI, a helpful cybersecurity assistant. "
-            "Answer naturally and intelligently. Do not repeat the user's message.\n\n"
-        )
-
-        for item in history:
-            prompt += f"{item['role']}: {item['text']}\n"
-
-        prompt += f"user: {payload.message}\nassistant:"
-
-        response = ai_model.generate_content(prompt)
-        reply_text = getattr(response, "text", None) or "No AI response returned."
-
-        history.append({"role": "user", "text": payload.message})
-        history.append({"role": "assistant", "text": reply_text})
-        conversation_memory[username] = history
-
-        return {"reply": reply_text}
-
+        formatted_history = [{"role": m["role"], "parts": [m["content"]]} for m in payload.history]
+        chat_session = ai_model.start_chat(history=formatted_history)
+        response = chat_session.send_message(payload.message)
+        return {"reply": response.text}
     except Exception as e:
         logger.error(f"AI Error: {e}")
-        raise HTTPException(status_code=500, detail="AI processing failed.")
+        raise HTTPException(status_code=500, detail=str(e))
