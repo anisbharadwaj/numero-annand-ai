@@ -51,10 +51,10 @@ ADMIN_USERNAME = os.getenv(
     "https://protected-ethical-anis-ai-12.onrender.com"
 )
 
-# PASSWORD = CHANGE THIS HASH IN RENDER ENVIRONMENT
 ADMIN_PASSWORD_HASH = os.getenv(
     "ADMIN_PASSWORD_HASH",
-    "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjIQqiRQYq"
+    "$2b$12$2M5QYz9VYxY5X0N4V3nP7eJ8x4Q9zB8W6m9xQ8Y0tB0bM3f3mJm9K"
+)
 )
 
 SERVER_START_TIME = time.time()
