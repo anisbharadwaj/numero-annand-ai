@@ -1,274 +1,214 @@
+// REPLACE THIS WITH YOUR RENDER URL
 const API_BASE_URL = "https://protected-ethical-anis-ai-12.onrender.com";
 
-const loginScreen = document.getElementById("login-screen");
-const dashboardScreen = document.getElementById("dashboard-screen");
-const healthMonitor = document.getElementById("health-monitor");
-const loginBtn = document.getElementById("loginBtn");
-const openAiBtn = document.getElementById("openAiBtn");
-const aiWidget = document.getElementById("ai-widget");
-const chatBox = document.getElementById("chatBox");
-const widgetChatBox = document.getElementById("widgetChatBox");
-const aiInput = document.getElementById("aiInput");
-const widgetInput = document.getElementById("widgetInput");
-const monitorBox = document.getElementById("monitorBox");
-const serverStatus = document.getElementById("serverStatus");
-const aiStatus = document.getElementById("aiStatus");
-const sendAi = document.getElementById("sendAi");
-const sendWidgetAi = document.getElementById("sendWidgetAi");
-const logoutBtn = document.getElementById("logoutBtn");
-const launchBtn = document.getElementById("launchBtn");
-const checkBtn = document.getElementById("checkBtn");
-const closeAi = document.getElementById("closeAi");
+const views = {
+    login: document.getElementById('login-view'),
+    bio: document.getElementById('biometric-view'),
+    dash: document.getElementById('dashboard-view')
+};
 
-let healthRetryCount = 0;
+let userState = { token: null, url: null, bioEnabled: false, activePlan: false };
+let chatHistory = [];
 
-function showDashboard() {
-  loginScreen.classList.add("hidden");
-  dashboardScreen.classList.remove("hidden");
-  openAiBtn.classList.remove("hidden");
+// 1. Backend Health Check Polling
+async function checkBackend() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/health`);
+        if (res.ok) {
+            document.getElementById('health-monitor').className = "status-box success";
+            document.getElementById('health-monitor').innerText = "SYSTEM ONLINE - AWAITING LOGIN";
+            document.getElementById('loginBtn').disabled = false;
+        } else throw new Error();
+    } catch {
+        document.getElementById('health-monitor').className = "status-box warning";
+        document.getElementById('health-monitor').innerText = "WAKING SERVER... PLEASE WAIT";
+        document.getElementById('loginBtn').disabled = true;
+        setTimeout(checkBackend, 5000); // Poll every 5 seconds
+    }
+}
+checkBackend();
+
+// 2. Login Submit
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    btn.innerText = "AUTHENTICATING...";
+    
+    const formData = new URLSearchParams();
+    formData.append("username", document.getElementById('username').value.trim());
+    formData.append("password", document.getElementById('password').value);
+    formData.append("human_check", document.getElementById('humanCheck').checked);
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/login`, { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail);
+
+        userState.token = "Bearer " + data.access_token;
+        userState.url = document.getElementById('username').value.trim();
+        userState.bioEnabled = data.biometric_enabled;
+        userState.activePlan = data.membership_active;
+        
+        document.getElementById('dash-user').innerText = userState.url;
+        updateMembershipUI(data.membership_tier, data.membership_active);
+        
+        views.login.classList.add('hidden');
+        views.bio.classList.remove('hidden'); 
+    } catch (err) {
+        btn.innerText = "INITIATE CONNECTION";
+        alert("Login Error: " + err.message);
+    }
+});
+
+// 3. WebAuthn Biometric Verification
+document.getElementById('authBiometricBtn').addEventListener('click', async () => {
+    const status = document.getElementById('bio-status');
+    status.innerText = "Prompting device biometrics (Fingerprint/FaceID)...";
+    
+    try {
+        let credentialId = "";
+        
+        if (!userState.bioEnabled) {
+            // Setup new Biometric
+            const publicKey = {
+                challenge: new Uint8Array(32),
+                rp: { name: "Anis-AI-Shield" },
+                user: { id: new Uint8Array(16), name: userState.url, displayName: userState.url },
+                pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                timeout: 60000
+            };
+            const credential = await navigator.credentials.create({ publicKey });
+            credentialId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+            
+            const res = await fetch(`${API_BASE_URL}/api/biometrics/register`, {
+                method: "POST", headers: { "Content-Type": "application/json", "Authorization": userState.token },
+                body: JSON.stringify({ credential_id: credentialId })
+            });
+            const data = await res.json();
+            userState.token = "Bearer " + data.access_token;
+            
+        } else {
+            // Verify existing Biometric
+            const publicKey = { challenge: new Uint8Array(32), timeout: 60000, userVerification: "required" };
+            const credential = await navigator.credentials.get({ publicKey });
+            credentialId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+            
+            const res = await fetch(`${API_BASE_URL}/api/biometrics/verify`, {
+                method: "POST", headers: { "Content-Type": "application/json", "Authorization": userState.token },
+                body: JSON.stringify({ credential_id: credentialId })
+            });
+            if(!res.ok) throw new Error("Biometric Mismatch");
+            const data = await res.json();
+            userState.token = "Bearer " + data.access_token;
+        }
+
+        views.bio.classList.add('hidden');
+        views.dash.classList.remove('hidden');
+        checkAIStatus();
+        
+    } catch (err) {
+        status.innerText = "Verification failed or cancelled by user. Try again.";
+        console.error(err);
+    }
+});
+
+// 4. Dashboard & Membership Logic
+function updateMembershipUI(tier, isActive) {
+    const memText = document.getElementById('dash-membership');
+    const upgBtn = document.getElementById('upgradeBtn');
+    
+    if (isActive) {
+        memText.innerText = `${tier} (ACTIVE)`;
+        memText.className = "text-green";
+        upgBtn.classList.add('hidden');
+    } else {
+        memText.innerText = "FREE (LIMITED)";
+        memText.className = "text-purple";
+        upgBtn.classList.remove('hidden');
+    }
 }
 
-function showLogin() {
-  loginScreen.classList.remove("hidden");
-  dashboardScreen.classList.add("hidden");
-  openAiBtn.classList.add("hidden");
-  aiWidget.classList.add("hidden");
-}
+document.getElementById('upgradeBtn').addEventListener('click', () => {
+    document.getElementById('qr-modal').classList.remove('hidden');
+});
+document.getElementById('closeQrBtn').addEventListener('click', () => {
+    document.getElementById('qr-modal').classList.add('hidden');
+});
 
-function showNotice(message, isError = false) {
-  healthMonitor.className = isError ? "status-box warning" : "status-box success";
-  healthMonitor.innerHTML = message;
-}
-
-async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      mode: "cors",
-      signal: controller.signal
+let selectedPlan = "MONTHLY";
+document.querySelectorAll('.plan-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.plan-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        selectedPlan = e.target.dataset.plan;
     });
-    return response;
-  } finally {
-    clearTimeout(timer);
-  }
-}
+});
 
-async function pollHealth() {
-  try {
-    const start = Date.now();
-    const res = await fetchWithTimeout(`${API_BASE_URL}/health`, {}, 12000);
+document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
+    const formData = new URLSearchParams();
+    formData.append("plan", selectedPlan);
+    
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/membership/upgrade`, {
+            method: "POST", headers: { "Authorization": userState.token }, body: formData
+        });
+        if(res.ok) {
+            alert("Payment Verified. AI Core Unlocked.");
+            document.getElementById('qr-modal').classList.add('hidden');
+            updateMembershipUI(selectedPlan, true);
+            userState.activePlan = true;
+            checkAIStatus();
+        }
+    } catch (e) { alert("Verification Error. Please try again."); }
+});
 
-    if (!res.ok) {
-      throw new Error(`Health check failed: ${res.status}`);
+function checkAIStatus() {
+    if(userState.activePlan) {
+        document.getElementById('openAiBtn').classList.remove('hidden');
     }
-
-    const data = await res.json();
-    const elapsed = Date.now() - start;
-
-    healthRetryCount = 0;
-    showNotice(
-      `<i class="fa-solid fa-circle-check"></i> RENDER SERVER ONLINE (Uptime: ${data.uptime}s, ${elapsed}ms)`,
-      false
-    );
-
-    serverStatus.innerText = "ONLINE";
-    aiStatus.innerText = data.ai_connected ? "READY" : "API KEY MISSING";
-
-    monitorBox.innerHTML = `
-      <strong>Status:</strong> ${data.status}<br>
-      <strong>Version:</strong> ${data.version}<br>
-      <strong>Uptime:</strong> ${data.uptime}s<br>
-      <strong>AI Connected:</strong> ${data.ai_connected ? "YES" : "NO"}<br>
-      <strong>Latency:</strong> ${elapsed}ms
-    `;
-  } catch (e) {
-    healthRetryCount++;
-    serverStatus.innerText = "OFFLINE";
-    aiStatus.innerText = "STANDBY";
-    showNotice(
-      `<i class="fa-solid fa-triangle-exclamation"></i> SERVER WAKING UP... PLEASE WAIT`,
-      true
-    );
-
-    monitorBox.innerHTML = `
-      <strong>Status:</strong> WAKING UP<br>
-      <strong>Retry:</strong> ${healthRetryCount}<br>
-      <strong>Note:</strong> Render may be sleeping. Retrying automatically...
-    `;
-  }
 }
 
-function appendMessage(container, text, type) {
-  const div = document.createElement("div");
-  div.className = `msg ${type}`;
-  div.innerHTML = text;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
+// 5. Intelligent AI Core (Chat Logic)
+const aiWidget = document.getElementById('ai-widget');
+const chatBox = document.getElementById('chatBox');
+const aiInput = document.getElementById('aiInput');
 
-function addTyping(container) {
-  const id = `typing-${Date.now()}`;
-  const div = document.createElement("div");
-  div.className = "msg ai";
-  div.id = id;
-  div.innerHTML = `<i class="fa-solid fa-ellipsis fa-fade"></i>`;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-  return id;
-}
+document.getElementById('openAiBtn').addEventListener('click', () => { aiWidget.classList.remove('hidden'); });
+document.getElementById('closeAi').addEventListener('click', () => { aiWidget.classList.add('hidden'); });
 
-function getToken() {
-  return sessionStorage.getItem("anis_jwt") || "";
-}
+async function sendAiMsg() {
+    const msg = aiInput.value.trim();
+    if(!msg) return;
+    
+    chatBox.innerHTML += `<div class="msg user">${msg}</div>`;
+    aiInput.value = "";
+    
+    const typingId = "msg-" + Date.now();
+    chatBox.innerHTML += `<div class="msg ai" id="${typingId}">Analyzing network context...</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-function setToken(token) {
-  sessionStorage.setItem("anis_jwt", token);
-}
-
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
-  const humanCheck = document.getElementById("humanCheck").checked;
-
-  if (!humanCheck) {
-    showNotice("Please verify identity first.", true);
-    return;
-  }
-
-  if (!username || !password) {
-    showNotice("Render URL and password are required.", true);
-    return;
-  }
-
-  loginBtn.disabled = true;
-  loginBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> CONNECTING SECURE TUNNEL...`;
-
-  const formData = new URLSearchParams();
-  formData.append("username", username);
-  formData.append("password", password);
-  formData.append("captcha_verified", "true");
-
-  try {
-    const response = await fetchWithTimeout(`${API_BASE_URL}/api/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: formData
-    }, 15000);
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(data.detail || "Authentication Failed.");
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": userState.token },
+            body: JSON.stringify({ message: msg, history: chatHistory })
+        });
+        
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.detail || "Server Error");
+        
+        chatHistory.push({ role: "user", content: msg });
+        chatHistory.push({ role: "model", content: data.reply });
+        
+        document.getElementById(typingId).innerHTML = marked.parse(data.reply);
+    } catch (err) {
+        document.getElementById(typingId).innerText = `[CORE ERROR]: ${err.message}`;
+        document.getElementById(typingId).style.color = "var(--red)";
     }
-
-    setToken(data.access_token);
-    showNotice("Access Key Authorized. Unlocking Terminal.", false);
-
-    setTimeout(() => {
-      showDashboard();
-      pollHealth();
-    }, 900);
-  } catch (err) {
-    console.error("Login error:", err);
-    showNotice(err.message || "Failed to fetch.", true);
-  } finally {
-    loginBtn.disabled = false;
-    loginBtn.innerHTML = `<i class="fa-solid fa-power-off"></i> INITIATE CONNECTION`;
-  }
-});
-
-async function sendAiMessage(container, inputEl) {
-  const text = inputEl.value.trim();
-  if (!text) return;
-
-  appendMessage(container, text, "user");
-  inputEl.value = "";
-
-  const typingId = addTyping(container);
-
-  try {
-    const token = getToken();
-    const response = await fetchWithTimeout(`${API_BASE_URL}/api/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ message: text })
-    }, 20000);
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(data.detail || "AI request failed.");
-    }
-
-    const reply = data.reply || "No AI response returned.";
-
-    const target = document.getElementById(typingId);
-    if (target) {
-      target.innerHTML = window.marked ? marked.parse(reply) : reply;
-    }
-  } catch (e) {
-    const target = document.getElementById(typingId);
-    if (target) {
-      target.innerHTML = `<span style="color:var(--danger)">Connection to AI Core severed.</span>`;
-    }
-  }
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-sendAi.addEventListener("click", () => sendAiMessage(chatBox, aiInput));
-sendWidgetAi.addEventListener("click", () => sendAiMessage(widgetChatBox, widgetInput));
-
-aiInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendAiMessage(chatBox, aiInput);
-});
-
-widgetInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendAiMessage(widgetChatBox, widgetInput);
-});
-
-logoutBtn.addEventListener("click", () => {
-  sessionStorage.removeItem("anis_jwt");
-  showLogin();
-  location.reload();
-});
-
-openAiBtn.addEventListener("click", () => {
-  aiWidget.classList.remove("hidden");
-  openAiBtn.classList.add("hidden");
-});
-
-closeAi.addEventListener("click", () => {
-  aiWidget.classList.add("hidden");
-  openAiBtn.classList.remove("hidden");
-});
-
-launchBtn.addEventListener("click", () => {
-  aiWidget.classList.remove("hidden");
-  openAiBtn.classList.add("hidden");
-  widgetInput.focus();
-});
-
-checkBtn.addEventListener("click", () => {
-  pollHealth();
-});
-
-window.addEventListener("load", async () => {
-  const existingToken = getToken();
-  if (existingToken) {
-    showDashboard();
-  } else {
-    showLogin();
-  }
-
-  await pollHealth();
-  setInterval(pollHealth, 30000);
-});
+document.getElementById('sendAi').addEventListener('click', sendAiMsg);
+aiInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendAiMsg(); });
+document.getElementById('logoutBtn').addEventListener('click', () => location.reload());
