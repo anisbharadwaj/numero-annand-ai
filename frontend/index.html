@@ -1,110 +1,471 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ANIS-AI-SHIELD</title>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-</head>
-<body>
+:root {
+  --cyan: #00f0ff;
+  --dark-bg: #05070a;
+  --glass-bg: rgba(10, 15, 25, 0.72);
+  --glass-border: rgba(0, 240, 255, 0.2);
+  --text-main: #ffffff;
+  --text-muted: #8ea1d1;
+  --danger: #ff4d4d;
+  --success: #00ff9d;
+}
 
-<div id="login-screen" class="screen">
-  <div class="glass-panel auth-panel">
-    <div class="logo-block">
-      <i class="fa-solid fa-shield-halved glow-icon"></i>
-      <h1 class="neon-text">ANIS-AI-SHIELD</h1>
-      <p class="subtitle">SECURE TERMINAL NODE</p>
-    </div>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
 
-    <form id="loginForm" class="login-form">
-      <label class="cyber-label">RENDER URL (USERNAME)</label>
-      <p class="helper-text">[Enter your Render deployment URL]</p>
-      <input type="text" id="username" class="cyber-input" placeholder="https://your-app.onrender.com" required>
+body {
+  background: var(--dark-bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(0, 240, 255, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(255, 0, 255, 0.08), transparent 25%),
+    radial-gradient(circle at 50% 90%, rgba(0, 136, 255, 0.08), transparent 25%);
+}
 
-      <label class="cyber-label">SECURE PASSWORD</label>
-      <p class="helper-text">[Enter your private Render password]</p>
-      <input type="password" id="password" class="cyber-input" placeholder="••••••••" required>
+.hidden {
+  display: none !important;
+}
 
-      <div class="human-verify">
-        <input type="checkbox" id="humanCheck" required>
-        <label for="humanCheck">I AM HUMAN — VERIFY IDENTITY</label>
-      </div>
+.screen {
+  width: 100%;
+  min-height: 100vh;
+}
 
-      <button type="submit" id="loginBtn" class="cyber-btn">
-        <i class="fa-solid fa-power-off"></i> INITIATE CONNECTION
-      </button>
-    </form>
+#login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
 
-    <div id="health-monitor" class="status-box warning">
-      <i class="fas fa-spinner fa-spin"></i> CONNECTING TO ANIS AI CORE...
-    </div>
-  </div>
-</div>
+.glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 40px 30px;
+  box-shadow: 0 0 35px rgba(0, 240, 255, 0.05);
+}
 
-<div id="dashboard-view" class="screen hidden">
-  <header class="dash-header">
-    <div>
-      <h2><i class="fa-solid fa-network-wired"></i> SYSTEM DASHBOARD</h2>
-      <p class="dash-subtitle">Anis-AI-Shield is online</p>
-    </div>
-    <div class="header-actions">
-      <button id="launchBtn" class="cyber-btn-small">LAUNCH</button>
-      <button id="checkBtn" class="cyber-btn-small">CHECK</button>
-      <button id="logoutBtn" class="cyber-btn-small danger">DISCONNECT</button>
-    </div>
-  </header>
+.auth-panel {
+  width: min(100%, 560px);
+}
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <h3>SERVER STATUS</h3>
-      <p class="text-cyan" id="serverStatus">WAKING...</p>
-    </div>
-    <div class="stat-card">
-      <h3>AI CORE</h3>
-      <p class="text-cyan" id="aiStatus">STANDBY</p>
-    </div>
-    <div class="stat-card">
-      <h3>SECURITY</h3>
-      <p class="text-green">ENCRYPTED</p>
-    </div>
-  </div>
+.logo-block {
+  text-align: center;
+  margin-bottom: 28px;
+}
 
-  <div class="workspace">
-    <div class="panel">
-      <h3>HEALTH MONITOR</h3>
-      <div class="monitor" id="monitorBox">Waiting...</div>
-    </div>
+.glow-icon {
+  font-size: 3rem;
+  color: var(--cyan);
+  text-shadow: 0 0 15px var(--cyan);
+  margin-bottom: 10px;
+}
 
-    <div class="panel">
-      <h3>AI CHAT</h3>
-      <div class="chat-box" id="chatBox"></div>
+.neon-text {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-align: center;
+  color: var(--text-main);
+  text-shadow:
+    0 0 10px rgba(0, 240, 255, 0.8),
+    0 0 30px rgba(0, 240, 255, 0.45);
+}
 
-      <div class="chat-input-row">
-        <input type="text" id="aiInput" class="cyber-input" placeholder="Ask AI...">
-        <button id="sendAi" class="cyber-btn">SEND</button>
-      </div>
-    </div>
-  </div>
-</div>
+.subtitle {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-top: 8px;
+}
 
-<div id="ai-widget" class="hidden">
-  <div class="ai-header">
-    <span><i class="fa-solid fa-robot"></i> Anis AI</span>
-    <button id="closeAi"><i class="fa-solid fa-xmark"></i></button>
-  </div>
-  <div class="ai-chat-box" id="widgetChatBox"></div>
-  <div class="ai-input-area">
-    <input type="text" id="widgetInput" placeholder="Command Anis AI...">
-    <button id="sendWidgetAi"><i class="fa-solid fa-paper-plane"></i></button>
-  </div>
-</div>
+.cyber-label {
+  display: block;
+  margin: 16px 0 4px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
 
-<button id="openAiBtn" class="hidden floating-btn">
-  <i class="fa-solid fa-comment-dots"></i>
-</button>
+.helper-text {
+  margin-bottom: 8px;
+  color: #99add8;
+  font-size: 12px;
+  opacity: 0.95;
+}
 
-<script src="script.js"></script>
-</body>
-</html>
+.cyber-input {
+  width: 100%;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.58);
+  color: white;
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  outline: none;
+  transition: 0.3s;
+  font-size: 15px;
+}
+
+.cyber-input::placeholder {
+  color: #7f8ba8;
+}
+
+.cyber-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.18);
+}
+
+.human-verify {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  background: rgba(0, 0, 0, 0.42);
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.human-verify input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--cyan);
+}
+
+.human-verify label {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.cyber-btn {
+  width: 100%;
+  margin-top: 22px;
+  padding: 15px;
+  background: linear-gradient(90deg, #0088ff, var(--cyan));
+  border: none;
+  border-radius: 10px;
+  color: black;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+  text-transform: uppercase;
+}
+
+.cyber-btn:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.cyber-btn:disabled {
+  background: #333;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.status-box {
+  margin-top: 20px;
+  padding: 12px 14px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status-box.warning {
+  background: rgba(255, 204, 0, 0.08);
+  color: #ffcc00;
+  border: 1px solid rgba(255, 204, 0, 0.25);
+}
+
+.status-box.success {
+  background: rgba(0, 255, 157, 0.08);
+  color: var(--success);
+  border: 1px solid rgba(0, 255, 157, 0.25);
+}
+
+#dashboard-view {
+  padding: 28px;
+}
+
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 26px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--glass-border);
+  gap: 16px;
+}
+
+.dash-header h2 {
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  letter-spacing: 1px;
+}
+
+.dash-subtitle {
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cyber-btn-small {
+  background: rgba(0, 240, 255, 0.1);
+  color: var(--cyan);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  transition: 0.3s;
+}
+
+.cyber-btn-small:hover {
+  background: rgba(0, 240, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.cyber-btn-small.danger {
+  background: rgba(255, 77, 77, 0.12);
+  color: var(--danger);
+  border-color: rgba(255, 77, 77, 0.4);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--glass-bg);
+  padding: 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.stat-card h3 {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.stat-card p {
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.text-green {
+  color: var(--success);
+}
+
+.text-cyan {
+  color: var(--cyan);
+  text-shadow: 0 0 10px var(--cyan);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  max-width: 1200px;
+}
+
+.panel {
+  background: var(--glass-bg);
+  padding: 20px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+}
+
+.panel h3 {
+  margin-bottom: 14px;
+  letter-spacing: 1px;
+}
+
+.monitor {
+  color: #c9d4ff;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.chat-box {
+  height: 280px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input-row .cyber-input {
+  flex: 1;
+}
+
+#ai-widget {
+  position: fixed;
+  bottom: 96px;
+  right: 24px;
+  width: 360px;
+  height: 520px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  z-index: 1000;
+  backdrop-filter: blur(20px);
+}
+
+.ai-header {
+  background: rgba(0, 240, 255, 0.1);
+  padding: 14px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--glass-border);
+  font-weight: 900;
+  color: var(--cyan);
+}
+
+.ai-header button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.ai-chat-box {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msg {
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 85%;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: white;
+}
+
+.msg.ai {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #e0e6ff;
+}
+
+.ai-input-area {
+  display: flex;
+  padding: 14px;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(0,0,0,0.5);
+}
+
+.ai-input-area input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: white;
+  outline: none;
+  font-size: 14px;
+}
+
+.ai-input-area button {
+  background: none;
+  border: none;
+  color: var(--cyan);
+  cursor: pointer;
+  font-size: 18px;
+  margin-left: 10px;
+}
+
+.floating-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--cyan);
+  color: black;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 0 20px var(--cyan);
+  z-index: 1000;
+  transition: 0.3s;
+}
+
+.floating-btn:hover {
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  #dashboard-view {
+    padding: 18px;
+  }
+
+  .dash-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chat-input-row {
+    flex-direction: column;
+  }
+
+  #ai-widget {
+    width: calc(100% - 16px);
+    height: 70vh;
+    right: 8px;
+    bottom: 8px;
+  }
+
+  .floating-btn {
+    right: 14px;
+    bottom: 14px;
+  }
+}
