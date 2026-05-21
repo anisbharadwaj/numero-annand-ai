@@ -3,11 +3,9 @@ services:
     name: anis-ai-shield
     runtime: python
 
-    buildCommand: |
-      pip install -r backend/requirements.txt
+    buildCommand: pip install -r backend/requirements.txt
 
-    startCommand: |
-      python -m uvicorn backend.app:app --host 0.0.0.0 --port 10000
+    startCommand: uvicorn backend.app:app --host 0.0.0.0 --port $PORT
 
     envVars:
       - key: PYTHON_VERSION
