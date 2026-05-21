@@ -12,9 +12,6 @@ from pydantic import BaseModel
 from database import SessionLocal, User, init_db
 from auth import hash_password, verify_password, create_access_token, decode_token
 
-# -----------------------------
-# Logging
-# -----------------------------
 os.makedirs("logs", exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
@@ -26,20 +23,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger("anis-ai-shield")
 
-# -----------------------------
-# Environment
-# -----------------------------
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 VERCEL_URL = os.getenv("VERCEL_URL", "https://anis-ai-shield.vercel.app")
 SERVER_START_TIME = time.time()
-
-# Optional seeded users from env:
-# INITIAL_USERS='[{"url":"https://your-render-url.onrender.com","pass":"YourPassword"}]'
 INITIAL_USERS = os.getenv("INITIAL_USERS", "[]")
 
-# -----------------------------
-# Gemini setup
-# -----------------------------
 ai_model = None
 if GEMINI_API_KEY:
     try:
@@ -52,12 +40,8 @@ if GEMINI_API_KEY:
 else:
     logger.warning("GEMINI_API_KEY not set. AI will not work until configured.")
 
-# -----------------------------
-# App
-# -----------------------------
 app = FastAPI(title="Anis-AI-Shield", version="2.0.0")
 
-# No cookies are used; JWT is sent in Authorization header
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -65,7 +49,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:5500",
-        "http://127.0.0.1:5500",
+        "http://127.0.0.1:5500"
     ],
     allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=False,
@@ -73,9 +57,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -----------------------------
-# DB init
-# -----------------------------
 init_db()
 
 
@@ -120,7 +101,7 @@ class ChatMessage(BaseModel):
     message: str
 
 
-conversation_memory = {}  # in-memory short chat history per user
+conversation_memory = {}
 
 
 @app.on_event("startup")
@@ -206,8 +187,7 @@ def chat(payload: ChatMessage, authorization: Optional[str] = Header(None)):
     try:
         prompt = (
             "You are Anis AI, a helpful cybersecurity assistant. "
-            "Answer naturally, intelligently, and do not repeat the user's message. "
-            "Use the prior conversation for context.\n\n"
+            "Answer naturally and intelligently. Do not repeat the user's message.\n\n"
         )
 
         for item in history:
