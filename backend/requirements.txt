@@ -5,3 +5,4 @@ google-genai
 python-dotenv
 passlib[bcrypt]
 python-jose[cryptography]
+slowapi
